@@ -127,7 +127,7 @@
 
         async function loadProducts() {
             try {
-                const result = await window.storage.get('products-data');
+                const result = await window.storage.get('products-data', true);
                 if (result && result.value) {
                     products = JSON.parse(result.value);
                 } else {
@@ -136,7 +136,7 @@
                         { id: 2, name: 'Eau de Toilette Citrus', image: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400&h=400&fit=crop' },
                         { id: 3, name: 'Perfume Amadeirado', image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop' }
                     ];
-                    await window.storage.set('products-data', JSON.stringify(products));
+                    await window.storage.set('products-data', JSON.stringify(products), true);
                 }
             } catch (error) {
                 products = [
@@ -150,10 +150,22 @@
 
         async function saveProducts() {
             try {
-                await window.storage.set('products-data', JSON.stringify(products));
+                await window.storage.set('products-data', JSON.stringify(products), true);
+                showNotification('✅ Salvo! Visível em todos os dispositivos');
             } catch (error) {
                 console.error('Erro ao salvar:', error);
+                showNotification('❌ Erro ao salvar. Tente novamente.');
             }
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.className = 'fixed top-20 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-bounce';
+            document.body.appendChild(notification);
+            setTimeout(function() {
+                notification.remove();
+            }, 3000);
         }
 
         function renderProducts() {
@@ -165,7 +177,7 @@
             elements.productsGrid.style.display = 'grid';
             elements.emptyState.style.display = 'none';
             
-            elements.productsGrid.innerHTML = products.map(product => {
+            elements.productsGrid.innerHTML = products.map(function(product) {
                 const adminButtons = isAdmin ? 
                     '<div class="absolute top-2 right-2 flex gap-2">' +
                     '<button onclick="editProduct(' + product.id + ')" class="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors shadow-lg">✏️</button>' +
@@ -183,6 +195,23 @@
                     '</div>';
             }).join('');
         }
+
+        setInterval(async function() {
+            if (!isAdmin) {
+                try {
+                    const result = await window.storage.get('products-data', true);
+                    if (result && result.value) {
+                        const newProducts = JSON.parse(result.value);
+                        if (JSON.stringify(newProducts) !== JSON.stringify(products)) {
+                            products = newProducts;
+                            renderProducts();
+                        }
+                    }
+                } catch (error) {
+                    console.log('Erro ao atualizar produtos');
+                }
+            }
+        }, 5000);
 
         elements.loginBtn.addEventListener('click', function() {
             elements.loginModal.style.display = 'flex';
