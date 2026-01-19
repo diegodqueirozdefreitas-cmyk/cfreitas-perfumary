@@ -1,346 +1,285 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, X, Edit2, Trash2, Lock, LogOut } from 'lucide-react';
-
-const PerfumaryWebsite = () => {
-  const [products, setProducts] = useState([]);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newProduct, setNewProduct] = useState({ name: '', image: '' });
-  const [editingId, setEditingId] = useState(null);
-  const [showLoginForm, setShowLoginForm] = useState(false);
-  const [password, setPassword] = useState('');
-  const [loginError, setLoginError] = useState('');
-
-  // IMPORTANTE: Altere esta senha para a sua própria senha secreta!
-  const ADMIN_PASSWORD = 'cfreitas2025';
-
-  // Carregar produtos do storage
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        const result = await window.storage.get('products-data');
-        if (result && result.value) {
-          setProducts(JSON.parse(result.value));
-        } else {
-          // Produtos iniciais de exemplo
-          const initialProducts = [
-            {
-              id: 1,
-              name: 'Perfume Floral Elegance',
-              image: 'https://images.unsplash.com/photo-1588405748880-12d1d2a59d75?w=400&h=400&fit=crop',
-            },
-            {
-              id: 2,
-              name: 'Eau de Toilette Citrus',
-              image: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400&h=400&fit=crop',
-            },
-            {
-              id: 3,
-              name: 'Perfume Amadeirado',
-              image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop',
-            },
-          ];
-          setProducts(initialProducts);
-          await window.storage.set('products-data', JSON.stringify(initialProducts));
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C.Freitas Perfumary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulseSlow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
-      } catch (error) {
-        // Se não existir, usa produtos padrão
-        const initialProducts = [
-          {
-            id: 1,
-            name: 'Perfume Floral Elegance',
-            image: 'https://images.unsplash.com/photo-1588405748880-12d1d2a59d75?w=400&h=400&fit=crop',
-          },
-          {
-            id: 2,
-            name: 'Eau de Toilette Citrus',
-            image: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400&h=400&fit=crop',
-          },
-          {
-            id: 3,
-            name: 'Perfume Amadeirado',
-            image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop',
-          },
-        ];
-        setProducts(initialProducts);
-      }
-    };
-    loadProducts();
-  }, []);
-
-  // Salvar produtos no storage sempre que mudarem
-  const saveProducts = async (updatedProducts) => {
-    try {
-      await window.storage.set('products-data', JSON.stringify(updatedProducts));
-      setProducts(updatedProducts);
-    } catch (error) {
-      console.error('Erro ao salvar produtos:', error);
-    }
-  };
-
-  const handleLogin = () => {
-    if (password === ADMIN_PASSWORD) {
-      setIsAdmin(true);
-      setShowLoginForm(false);
-      setPassword('');
-      setLoginError('');
-    } else {
-      setLoginError('Senha incorreta!');
-      setPassword('');
-    }
-  };
-
-  const handleLogout = () => {
-    setIsAdmin(false);
-    setShowAddForm(false);
-    setEditingId(null);
-    setNewProduct({ name: '', image: '' });
-  };
-
-  const addProduct = () => {
-    if (newProduct.name && newProduct.image) {
-      let updatedProducts;
-      if (editingId) {
-        updatedProducts = products.map(p => 
-          p.id === editingId ? { ...p, ...newProduct } : p
-        );
-        setEditingId(null);
-      } else {
-        updatedProducts = [...products, { 
-          id: Date.now(), 
-          ...newProduct 
-        }];
-      }
-      saveProducts(updatedProducts);
-      setNewProduct({ name: '', image: '' });
-      setShowAddForm(false);
-    }
-  };
-
-  const deleteProduct = (id) => {
-    const updatedProducts = products.filter(p => p.id !== id);
-    saveProducts(updatedProducts);
-  };
-
-  const startEdit = (product) => {
-    setNewProduct({ name: product.name, image: product.image });
-    setEditingId(product.id);
-    setShowAddForm(true);
-  };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50">
-      {/* Header */}
-      <header className="bg-white shadow-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            {/* Logo Animada */}
-            <div className="relative w-16 h-16">
-              <div className="absolute inset-0 bg-gradient-to-br from-pink-400 to-purple-600 rounded-full animate-pulse opacity-20"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-4xl font-serif font-bold bg-gradient-to-br from-pink-500 to-purple-600 bg-clip-text text-transparent animate-[pulse_2s_ease-in-out_infinite]">
-                  C
-                </span>
-              </div>
-              <div className="absolute inset-0 border-2 border-pink-300 rounded-full animate-spin" style={{animationDuration: '3s'}}></div>
+        @keyframes spinSlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .pulse-slow { animation: pulseSlow 2s ease-in-out infinite; }
+        .spin-slow { animation: spinSlow 3s linear infinite; }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50">
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div class="relative w-16 h-16">
+                    <div class="absolute inset-0 bg-gradient-to-br from-pink-400 to-purple-600 rounded-full animate-pulse opacity-20"></div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="text-4xl font-serif font-bold bg-gradient-to-br from-pink-500 to-purple-600 bg-clip-text text-transparent pulse-slow">C</span>
+                    </div>
+                    <div class="absolute inset-0 border-2 border-pink-300 rounded-full spin-slow"></div>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-serif font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">C.Freitas</h1>
+                    <p class="text-sm text-gray-600 italic">Perfumary</p>
+                </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-serif font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                C.Freitas
-              </h1>
-              <p className="text-sm text-gray-600 italic">Perfumary</p>
-            </div>
-          </div>
-          
-          {isAdmin ? (
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
-            >
-              <LogOut size={18} />
-              Sair do Admin
+            <button id="loginBtn" class="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm">
+                <span>🔒</span> Login Admin
             </button>
-          ) : (
-            <button
-              onClick={() => setShowLoginForm(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
-            >
-              <Lock size={18} />
-              Login Admin
+            <button id="logoutBtn" style="display: none;" class="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm">
+                <span>🚪</span> Sair do Admin
             </button>
-          )}
         </div>
-      </header>
+    </header>
 
-      {/* Login Modal */}
-      {showLoginForm && !isAdmin && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-gray-800">Login Administrativo</h3>
-              <button onClick={() => {
-                setShowLoginForm(false);
-                setPassword('');
-                setLoginError('');
-              }}>
-                <X size={24} className="text-gray-500 hover:text-gray-700" />
-              </button>
+    <div id="loginModal" style="display: none;" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Login Administrativo</h3>
+                <button id="closeLoginModal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
             </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Senha
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="Digite a senha"
-                />
-                {loginError && (
-                  <p className="text-red-500 text-sm mt-2">{loginError}</p>
-                )}
-              </div>
-              <button
-                onClick={handleLogin}
-                className="w-full py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg hover:from-pink-600 hover:to-purple-700 transition-all font-medium"
-              >
-                Entrar
-              </button>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Senha</label>
+                    <input type="password" id="passwordInput" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Digite a senha">
+                    <p id="loginError" style="display: none;" class="text-red-500 text-sm mt-2">Senha incorreta!</p>
+                </div>
+                <button id="loginSubmit" class="w-full py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg hover:from-pink-600 hover:to-purple-700 transition-all font-medium">Entrar</button>
             </div>
-          </div>
         </div>
-      )}
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-12">
-        {/* Admin Controls */}
-        {isAdmin && (
-          <div className="mb-8 flex justify-center">
-            <button
-              onClick={() => {
-                setShowAddForm(!showAddForm);
-                setEditingId(null);
-                setNewProduct({ name: '', image: '' });
-              }}
-              className="flex items-center gap-2 px-6 py-3 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors shadow-lg"
-            >
-              <Plus size={20} />
-              Adicionar Produto
-            </button>
-          </div>
-        )}
-
-        {/* Add/Edit Form */}
-        {isAdmin && showAddForm && (
-          <div className="mb-8 max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-gray-800">
-                {editingId ? 'Editar Produto' : 'Novo Produto'}
-              </h3>
-              <button onClick={() => {
-                setShowAddForm(false);
-                setEditingId(null);
-                setNewProduct({ name: '', image: '' });
-              }}>
-                <X size={24} className="text-gray-500 hover:text-gray-700" />
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nome do Produto
-                </label>
-                <input
-                  type="text"
-                  value={newProduct.name}
-                  onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                  placeholder="Ex: Perfume Floral"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  URL da Imagem
-                </label>
-                <input
-                  type="text"
-                  value={newProduct.image}
-                  onChange={(e) => setNewProduct({...newProduct, image: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                  placeholder="https://..."
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Dica: Faça upload em imgur.com e cole o link aqui
-                </p>
-              </div>
-              <button
-                onClick={addProduct}
-                className="w-full py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg hover:from-pink-600 hover:to-purple-700 transition-all font-medium"
-              >
-                {editingId ? 'Salvar Alterações' : 'Adicionar Produto'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {products.map((product) => (
-            <div
-              key={product.id}
-              className="group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
-            >
-              <div className="relative h-64 overflow-hidden bg-gradient-to-br from-pink-100 to-purple-100">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                {isAdmin && (
-                  <div className="absolute top-2 right-2 flex gap-2">
-                    <button
-                      onClick={() => startEdit(product)}
-                      className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors shadow-lg"
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                    <button
-                      onClick={() => deleteProduct(product.id)}
-                      className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                )}
-              </div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-800 text-center">
-                  {product.name}
-                </h3>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {products.length === 0 && (
-          <div className="text-center py-20">
-            <p className="text-gray-500 text-lg">Nenhum produto cadastrado ainda.</p>
-          </div>
-        )}
-      </main>
-
-      {/* Footer */}
-      <footer className="bg-gradient-to-r from-pink-600 to-purple-600 text-white py-8 mt-20">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-lg font-serif">C.Freitas Perfumary</p>
-          <p className="text-sm mt-2 opacity-90">Fragrâncias que contam histórias</p>
-        </div>
-      </footer>
     </div>
-  );
-};
 
-export default PerfumaryWebsite;
+    <main class="max-w-7xl mx-auto px-4 py-12">
+        <div id="adminControls" style="display: none;" class="mb-8 flex justify-center">
+            <button id="addProductBtn" class="flex items-center gap-2 px-6 py-3 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors shadow-lg">
+                <span>➕</span> Adicionar Produto
+            </button>
+        </div>
+
+        <div id="productForm" style="display: none;" class="mb-8 max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="formTitle" class="text-xl font-bold text-gray-800">Novo Produto</h3>
+                <button id="closeForm" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nome do Produto</label>
+                    <input type="text" id="productName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Ex: Perfume Floral">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">URL da Imagem</label>
+                    <input type="text" id="productImage" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="https://...">
+                    <p class="text-xs text-gray-500 mt-1">Dica: Faça upload em imgur.com e cole o link aqui</p>
+                </div>
+                <button id="saveProduct" class="w-full py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg hover:from-pink-600 hover:to-purple-700 transition-all font-medium">Adicionar Produto</button>
+            </div>
+        </div>
+
+        <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        <div id="emptyState" style="display: none;" class="text-center py-20">
+            <p class="text-gray-500 text-lg">Nenhum produto cadastrado ainda.</p>
+        </div>
+    </main>
+
+    <footer class="bg-gradient-to-r from-pink-600 to-purple-600 text-white py-8 mt-20">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-lg font-serif">C.Freitas Perfumary</p>
+            <p class="text-sm mt-2 opacity-90">Fragrâncias que contam histórias</p>
+        </div>
+    </footer>
+
+    <script>
+        const ADMIN_PASSWORD = 'cfreitas2025';
+        let isAdmin = false;
+        let products = [];
+        let editingId = null;
+
+        const elements = {
+            loginBtn: document.getElementById('loginBtn'),
+            logoutBtn: document.getElementById('logoutBtn'),
+            loginModal: document.getElementById('loginModal'),
+            closeLoginModal: document.getElementById('closeLoginModal'),
+            passwordInput: document.getElementById('passwordInput'),
+            loginSubmit: document.getElementById('loginSubmit'),
+            loginError: document.getElementById('loginError'),
+            adminControls: document.getElementById('adminControls'),
+            addProductBtn: document.getElementById('addProductBtn'),
+            productForm: document.getElementById('productForm'),
+            closeForm: document.getElementById('closeForm'),
+            formTitle: document.getElementById('formTitle'),
+            productName: document.getElementById('productName'),
+            productImage: document.getElementById('productImage'),
+            saveProduct: document.getElementById('saveProduct'),
+            productsGrid: document.getElementById('productsGrid'),
+            emptyState: document.getElementById('emptyState')
+        };
+
+        async function loadProducts() {
+            try {
+                const result = await window.storage.get('products-data');
+                if (result && result.value) {
+                    products = JSON.parse(result.value);
+                } else {
+                    products = [
+                        { id: 1, name: 'Perfume Floral Elegance', image: 'https://images.unsplash.com/photo-1588405748880-12d1d2a59d75?w=400&h=400&fit=crop' },
+                        { id: 2, name: 'Eau de Toilette Citrus', image: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400&h=400&fit=crop' },
+                        { id: 3, name: 'Perfume Amadeirado', image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop' }
+                    ];
+                    await window.storage.set('products-data', JSON.stringify(products));
+                }
+            } catch (error) {
+                products = [
+                    { id: 1, name: 'Perfume Floral Elegance', image: 'https://images.unsplash.com/photo-1588405748880-12d1d2a59d75?w=400&h=400&fit=crop' },
+                    { id: 2, name: 'Eau de Toilette Citrus', image: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400&h=400&fit=crop' },
+                    { id: 3, name: 'Perfume Amadeirado', image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop' }
+                ];
+            }
+            renderProducts();
+        }
+
+        async function saveProducts() {
+            try {
+                await window.storage.set('products-data', JSON.stringify(products));
+            } catch (error) {
+                console.error('Erro ao salvar:', error);
+            }
+        }
+
+        function renderProducts() {
+            if (products.length === 0) {
+                elements.productsGrid.style.display = 'none';
+                elements.emptyState.style.display = 'block';
+                return;
+            }
+            elements.productsGrid.style.display = 'grid';
+            elements.emptyState.style.display = 'none';
+            
+            elements.productsGrid.innerHTML = products.map(product => {
+                const adminButtons = isAdmin ? 
+                    '<div class="absolute top-2 right-2 flex gap-2">' +
+                    '<button onclick="editProduct(' + product.id + ')" class="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors shadow-lg">✏️</button>' +
+                    '<button onclick="deleteProduct(' + product.id + ')" class="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg">🗑️</button>' +
+                    '</div>' : '';
+                
+                return '<div class="group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">' +
+                    '<div class="relative h-64 overflow-hidden bg-gradient-to-br from-pink-100 to-purple-100">' +
+                    '<img src="' + product.image + '" alt="' + product.name + '" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">' +
+                    adminButtons +
+                    '</div>' +
+                    '<div class="p-6">' +
+                    '<h3 class="text-xl font-semibold text-gray-800 text-center">' + product.name + '</h3>' +
+                    '</div>' +
+                    '</div>';
+            }).join('');
+        }
+
+        elements.loginBtn.addEventListener('click', function() {
+            elements.loginModal.style.display = 'flex';
+            elements.passwordInput.focus();
+        });
+
+        elements.closeLoginModal.addEventListener('click', function() {
+            elements.loginModal.style.display = 'none';
+            elements.passwordInput.value = '';
+            elements.loginError.style.display = 'none';
+        });
+
+        elements.loginSubmit.addEventListener('click', handleLogin);
+        elements.passwordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') handleLogin();
+        });
+
+        function handleLogin() {
+            if (elements.passwordInput.value === ADMIN_PASSWORD) {
+                isAdmin = true;
+                elements.loginModal.style.display = 'none';
+                elements.loginBtn.style.display = 'none';
+                elements.logoutBtn.style.display = 'flex';
+                elements.adminControls.style.display = 'flex';
+                elements.passwordInput.value = '';
+                elements.loginError.style.display = 'none';
+                renderProducts();
+            } else {
+                elements.loginError.style.display = 'block';
+                elements.passwordInput.value = '';
+            }
+        }
+
+        elements.logoutBtn.addEventListener('click', function() {
+            isAdmin = false;
+            elements.loginBtn.style.display = 'flex';
+            elements.logoutBtn.style.display = 'none';
+            elements.adminControls.style.display = 'none';
+            elements.productForm.style.display = 'none';
+            renderProducts();
+        });
+
+        elements.addProductBtn.addEventListener('click', function() {
+            editingId = null;
+            elements.formTitle.textContent = 'Novo Produto';
+            elements.saveProduct.textContent = 'Adicionar Produto';
+            elements.productName.value = '';
+            elements.productImage.value = '';
+            elements.productForm.style.display = 'block';
+        });
+
+        elements.closeForm.addEventListener('click', function() {
+            elements.productForm.style.display = 'none';
+            editingId = null;
+        });
+
+        elements.saveProduct.addEventListener('click', async function() {
+            if (!elements.productName.value || !elements.productImage.value) return;
+            
+            if (editingId) {
+                products = products.map(function(p) {
+                    return p.id === editingId ? { id: p.id, name: elements.productName.value, image: elements.productImage.value } : p;
+                });
+            } else {
+                products.push({ 
+                    id: Date.now(), 
+                    name: elements.productName.value, 
+                    image: elements.productImage.value 
+                });
+            }
+            
+            await saveProducts();
+            renderProducts();
+            elements.productForm.style.display = 'none';
+            editingId = null;
+        });
+
+        window.editProduct = function(id) {
+            const product = products.find(function(p) { return p.id === id; });
+            if (!product) return;
+            
+            editingId = id;
+            elements.formTitle.textContent = 'Editar Produto';
+            elements.saveProduct.textContent = 'Salvar Alterações';
+            elements.productName.value = product.name;
+            elements.productImage.value = product.image;
+            elements.productForm.style.display = 'block';
+        };
+
+        window.deleteProduct = async function(id) {
+            if (!confirm('Deseja realmente excluir este produto?')) return;
+            products = products.filter(function(p) { return p.id !== id; });
+            await saveProducts();
+            renderProducts();
+        };
+
+        loadProducts();
+    </script>
+</body>
+</html>
