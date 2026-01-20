@@ -1,15 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cfreitas Perfumary</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: "#C9A24D",
+            beige: "#F5EFE6",
+            brown: "#5C4033"
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-beige min-h-screen text-brown">
+
+<!-- HEADER -->
+<header class="bg-gradient-to-r from-brown to-gold text-white shadow-lg">
+  <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+    <div class="flex items-center gap-3">
+      <div class="w-12 h-12 rounded-full bg-white text-brown flex items-center justify-center font-bold text-xl">
+        CF
+      </div>
+      <h1 class="text-2xl font-bold tracking-wide">Cfreitas Perfumary</h1>
+    </div>
+
+    <div class="flex gap-3">
+      <button id="loginBtn" class="bg-white text-brown px-5 py-2 rounded-full font-semibold hover:bg-beige">
+        Área Admin
+      </button>
+      <button id="logoutBtn" class="hidden bg-red-600 px-5 py-2 rounded-full font-semibold">
+        Sair
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ADMIN CONTROLS -->
+<section id="adminControls" class="hidden max-w-7xl mx-auto p-6">
+  <button id="addProductBtn"
+    class="bg-gold text-white px-6 py-3 rounded-xl font-bold shadow hover:opacity-90">
+    ➕ Adicionar Produto
+  </button>
+</section>
+
+<!-- PRODUTOS -->
+<main class="max-w-7xl mx-auto px-6 pb-16">
+  <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8"></div>
+
+  <div id="emptyState" class="hidden text-center py-20 text-xl opacity-60">
+    Nenhum produto cadastrado
+  </div>
+</main>
+
+<!-- MODAL LOGIN -->
+<div id="loginModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+  <div class="bg-white rounded-2xl p-8 w-80 shadow-xl">
+    <h2 class="text-2xl font-bold text-center mb-6">Área Administrativa</h2>
+    <input id="passwordInput" type="password" placeholder="Senha"
+      class="w-full border px-4 py-3 rounded-lg mb-3">
+    <p id="loginError" class="hidden text-red-600 text-sm mb-3 text-center">
+      Senha incorreta
+    </p>
+    <button id="loginSubmit"
+      class="w-full bg-brown text-white py-3 rounded-lg font-semibold">
+      Entrar
+    </button>
+  </div>
+</div>
+
+<!-- MODAL PRODUTO -->
+<div id="productForm" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+  <div class="bg-white rounded-2xl p-8 w-96 shadow-xl">
+    <h2 class="text-xl font-bold mb-4">Produto</h2>
+    <input id="productName" placeholder="Nome do produto"
+      class="w-full border px-4 py-3 rounded-lg mb-3">
+    <input id="productImage" placeholder="URL da imagem"
+      class="w-full border px-4 py-3 rounded-lg mb-5">
+    <div class="flex gap-3">
+      <button id="saveProduct"
+        class="flex-1 bg-gold text-white py-3 rounded-lg font-bold">
+        Salvar
+      </button>
+      <button id="closeForm"
+        class="flex-1 bg-gray-300 py-3 rounded-lg font-bold">
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- FIREBASE + SCRIPT -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-  import {
-    getDatabase,
-    ref,
-    push,
-    onValue,
-    update,
-    remove
-  } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+  import { getDatabase, ref, push, onValue, update, remove }
+    from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
-  // 🔐 CONFIG FIREBASE
   const firebaseConfig = {
     apiKey: "AIzaSyCNcjKdISg8-X8QPFPY3pAqTCfjAa3Ie1M",
     authDomain: "cfreitas-perfumary.firebaseapp.com",
@@ -23,139 +118,98 @@
   const db = getDatabase(app);
   const productsRef = ref(db, "produtos");
 
-  // 🔐 ADMIN
   const ADMIN_PASSWORD = "cfreitas2025";
   let isAdmin = false;
   let editingId = null;
+  let products = [];
 
-  // ELEMENTOS
-  const el = {
-    loginBtn: document.getElementById("loginBtn"),
-    logoutBtn: document.getElementById("logoutBtn"),
-    loginModal: document.getElementById("loginModal"),
-    closeLoginModal: document.getElementById("closeLoginModal"),
-    passwordInput: document.getElementById("passwordInput"),
-    loginSubmit: document.getElementById("loginSubmit"),
-    loginError: document.getElementById("loginError"),
-    adminControls: document.getElementById("adminControls"),
-    addProductBtn: document.getElementById("addProductBtn"),
-    productForm: document.getElementById("productForm"),
-    closeForm: document.getElementById("closeForm"),
-    formTitle: document.getElementById("formTitle"),
-    productName: document.getElementById("productName"),
-    productImage: document.getElementById("productImage"),
-    saveProduct: document.getElementById("saveProduct"),
-    productsGrid: document.getElementById("productsGrid"),
-    emptyState: document.getElementById("emptyState")
-  };
+  const $ = id => document.getElementById(id);
 
-  // 🔐 LOGIN
-  function handleLogin() {
-    if (el.passwordInput.value === ADMIN_PASSWORD) {
+  $("loginBtn").onclick = () => $("loginModal").classList.remove("hidden");
+  $("loginSubmit").onclick = () => {
+    if ($("passwordInput").value === ADMIN_PASSWORD) {
       isAdmin = true;
-      el.loginModal.style.display = "none";
-      el.loginBtn.style.display = "none";
-      el.logoutBtn.style.display = "flex";
-      el.adminControls.style.display = "flex";
-      el.loginError.style.display = "none";
-      renderProducts(currentProducts);
+      $("loginModal").classList.add("hidden");
+      $("loginBtn").classList.add("hidden");
+      $("logoutBtn").classList.remove("hidden");
+      $("adminControls").classList.remove("hidden");
+      render();
     } else {
-      el.loginError.style.display = "block";
+      $("loginError").classList.remove("hidden");
     }
-    el.passwordInput.value = "";
-  }
-
-  el.loginBtn.onclick = () => el.loginModal.style.display = "flex";
-  el.closeLoginModal.onclick = () => el.loginModal.style.display = "none";
-  el.loginSubmit.onclick = handleLogin;
-
-  el.logoutBtn.onclick = () => {
-    isAdmin = false;
-    el.loginBtn.style.display = "flex";
-    el.logoutBtn.style.display = "none";
-    el.adminControls.style.display = "none";
-    el.productForm.style.display = "none";
-    renderProducts(currentProducts);
+    $("passwordInput").value = "";
   };
 
-  // 📦 PRODUTOS
-  let currentProducts = [];
+  $("logoutBtn").onclick = () => {
+    isAdmin = false;
+    $("loginBtn").classList.remove("hidden");
+    $("logoutBtn").classList.add("hidden");
+    $("adminControls").classList.add("hidden");
+    render();
+  };
 
-  onValue(productsRef, snapshot => {
-    currentProducts = [];
-    snapshot.forEach(child => {
-      currentProducts.push({ id: child.key, ...child.val() });
-    });
-    renderProducts(currentProducts);
+  $("addProductBtn").onclick = () => {
+    editingId = null;
+    $("productForm").classList.remove("hidden");
+  };
+
+  $("closeForm").onclick = () => $("productForm").classList.add("hidden");
+
+  $("saveProduct").onclick = async () => {
+    const name = $("productName").value;
+    const image = $("productImage").value;
+    if (!name || !image) return;
+
+    if (editingId) {
+      await update(ref(db, "produtos/" + editingId), { name, image });
+    } else {
+      await push(productsRef, { name, image });
+    }
+
+    $("productForm").classList.add("hidden");
+    $("productName").value = "";
+    $("productImage").value = "";
+  };
+
+  onValue(productsRef, snap => {
+    products = [];
+    snap.forEach(c => products.push({ id: c.key, ...c.val() }));
+    render();
   });
 
-  function renderProducts(products) {
+  window.editProduct = id => {
+    const p = products.find(x => x.id === id);
+    editingId = id;
+    $("productName").value = p.name;
+    $("productImage").value = p.image;
+    $("productForm").classList.remove("hidden");
+  };
+
+  window.deleteProduct = id => {
+    if (confirm("Excluir produto?")) remove(ref(db, "produtos/" + id));
+  };
+
+  function render() {
+    const grid = $("productsGrid");
     if (!products.length) {
-      el.productsGrid.style.display = "none";
-      el.emptyState.style.display = "block";
+      $("emptyState").classList.remove("hidden");
+      grid.innerHTML = "";
       return;
     }
-
-    el.productsGrid.style.display = "grid";
-    el.emptyState.style.display = "none";
-
-    el.productsGrid.innerHTML = products.map(p => `
-      <div class="relative bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl shadow-xl border-2 border-amber-200 overflow-hidden">
-        <img src="${p.image}" class="w-full h-72 object-cover">
+    $("emptyState").classList.add("hidden");
+    grid.innerHTML = products.map(p => `
+      <div class="bg-white rounded-2xl shadow-xl overflow-hidden border">
+        <img src="${p.image}" class="h-64 w-full object-cover">
+        <div class="p-5 text-center font-bold">${p.name}</div>
         ${isAdmin ? `
-          <div class="absolute top-3 right-3 flex gap-2">
-            <button onclick="editProduct('${p.id}')" class="p-3 bg-blue-500 text-white rounded-full">✏️</button>
-            <button onclick="deleteProduct('${p.id}')" class="p-3 bg-red-500 text-white rounded-full">🗑️</button>
-          </div>
-        ` : ""}
-        <div class="p-6 text-center">
-          <h3 class="text-2xl font-display font-bold text-amber-900">${p.name}</h3>
-        </div>
+          <div class="flex gap-2 p-4">
+            <button onclick="editProduct('${p.id}')" class="flex-1 bg-blue-500 text-white py-2 rounded">Editar</button>
+            <button onclick="deleteProduct('${p.id}')" class="flex-1 bg-red-500 text-white py-2 rounded">Excluir</button>
+          </div>` : ``}
       </div>
     `).join("");
   }
-
-  // ➕ SALVAR
-  el.saveProduct.onclick = async () => {
-    if (!el.productName.value || !el.productImage.value) return;
-
-    if (editingId) {
-      await update(ref(db, "produtos/" + editingId), {
-        name: el.productName.value,
-        image: el.productImage.value
-      });
-    } else {
-      await push(productsRef, {
-        name: el.productName.value,
-        image: el.productImage.value
-      });
-    }
-
-    el.productForm.style.display = "none";
-    editingId = null;
-    el.productName.value = "";
-    el.productImage.value = "";
-  };
-
-  window.editProduct = id => {
-    const p = currentProducts.find(x => x.id === id);
-    if (!p) return;
-    editingId = id;
-    el.productName.value = p.name;
-    el.productImage.value = p.image;
-    el.productForm.style.display = "block";
-  };
-
-  window.deleteProduct = async id => {
-    if (confirm("Excluir produto?")) {
-      await remove(ref(db, "produtos/" + id));
-    }
-  };
-
-  el.addProductBtn.onclick = () => {
-    editingId = null;
-    el.productName.value = "";
-    el.productImage.value = "";
-    el.productForm.style.display = "block";
-  };
 </script>
+
+</body>
+</html>
