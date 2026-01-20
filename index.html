@@ -5,97 +5,120 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>C.Freitas Perfumary</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        @keyframes pulseSlow {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
         }
-        @keyframes spinSlow {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
         }
-        .pulse-slow { animation: pulseSlow 2s ease-in-out infinite; }
-        .spin-slow { animation: spinSlow 3s linear infinite; }
+        @keyframes glow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(218, 165, 32, 0.3),
+                            0 0 40px rgba(218, 165, 32, 0.2),
+                            0 0 60px rgba(218, 165, 32, 0.1);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(218, 165, 32, 0.5),
+                            0 0 60px rgba(218, 165, 32, 0.3),
+                            0 0 80px rgba(218, 165, 32, 0.2);
+            }
+        }
+        .float { animation: float 3s ease-in-out infinite; }
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(218, 165, 32, 0.3), transparent);
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite;
+        }
+        .glow { animation: glow 2s ease-in-out infinite; }
+        .font-display { font-family: 'Playfair Display', serif; }
+        .font-body { font-family: 'Cormorant Garamond', serif; }
+        body { background: linear-gradient(135deg, #F5F5DC 0%, #FAF0E6 25%, #FFF8DC 50%, #F5DEB3 75%, #F5F5DC 100%); }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50">
-    <header class="bg-white shadow-md sticky top-0 z-50">
+<body class="min-h-screen">
+    <header class="bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-50 shadow-lg sticky top-0 z-50 border-b-2 border-amber-200">
         <div class="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
-            <div class="flex items-center gap-4">
-                <div class="relative w-16 h-16">
-                    <div class="absolute inset-0 bg-gradient-to-br from-pink-400 to-purple-600 rounded-full animate-pulse opacity-20"></div>
+            <div class="flex items-center gap-6">
+                <div class="relative w-20 h-20 float">
+                    <div class="absolute inset-0 bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-600 rounded-full glow"></div>
+                    <div class="absolute inset-1 bg-gradient-to-br from-amber-50 to-yellow-100 rounded-full"></div>
                     <div class="absolute inset-0 flex items-center justify-center">
-                        <span class="text-4xl font-serif font-bold bg-gradient-to-br from-pink-500 to-purple-600 bg-clip-text text-transparent pulse-slow">C</span>
+                        <span class="text-5xl font-display font-black bg-gradient-to-br from-amber-600 via-yellow-700 to-amber-800 bg-clip-text text-transparent drop-shadow-lg">C</span>
                     </div>
-                    <div class="absolute inset-0 border-2 border-pink-300 rounded-full spin-slow"></div>
+                    <div class="absolute inset-0 border-3 border-amber-400 rounded-full shimmer"></div>
+                    <div class="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping"></div>
                 </div>
                 <div>
-                    <h1 class="text-3xl font-serif font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">C.Freitas</h1>
-                    <p class="text-sm text-gray-600 italic">Perfumary</p>
+                    <h1 class="text-5xl font-display font-black bg-gradient-to-r from-amber-700 via-yellow-600 to-amber-800 bg-clip-text text-transparent drop-shadow-md tracking-tight">C.Freitas</h1>
+                    <p class="text-lg font-body text-amber-700 italic tracking-widest mt-1">PERFUMARY</p>
                 </div>
             </div>
-            <button id="loginBtn" class="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm">
-                <span>🔒</span> Login Admin
+            <button id="loginBtn" class="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-600 to-yellow-700 text-white rounded-full hover:from-amber-700 hover:to-yellow-800 transition-all shadow-lg font-body text-base font-semibold">
+                <span>🔒</span> Admin
             </button>
-            <button id="logoutBtn" style="display: none;" class="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm">
-                <span>🚪</span> Sair do Admin
+            <button id="logoutBtn" style="display: none;" class="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-full hover:from-red-700 hover:to-red-800 transition-all shadow-lg font-body text-base font-semibold">
+                <span>🚪</span> Sair
             </button>
         </div>
     </header>
 
-    <div id="loginModal" style="display: none;" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-800">Login Administrativo</h3>
-                <button id="closeLoginModal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+    <div id="loginModal" style="display: none;" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl shadow-2xl max-w-md w-full p-8 border-2 border-amber-300">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-display font-bold text-amber-900">Login Administrativo</h3>
+                <button id="closeLoginModal" class="text-amber-600 hover:text-amber-900 text-3xl font-light">&times;</button>
             </div>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Senha</label>
-                    <input type="password" id="passwordInput" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Digite a senha">
-                    <p id="loginError" style="display: none;" class="text-red-500 text-sm mt-2">Senha incorreta!</p>
+                    <label class="block text-sm font-body font-semibold text-amber-800 mb-2">Senha</label>
+                    <input type="password" id="passwordInput" class="w-full px-4 py-3 border-2 border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white font-body" placeholder="Digite a senha">
+                    <p id="loginError" style="display: none;" class="text-red-600 text-sm mt-2 font-body">Senha incorreta!</p>
                 </div>
-                <button id="loginSubmit" class="w-full py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg hover:from-pink-600 hover:to-purple-700 transition-all font-medium">Entrar</button>
+                <button id="loginSubmit" class="w-full py-3 bg-gradient-to-r from-amber-600 to-yellow-700 text-white rounded-lg hover:from-amber-700 hover:to-yellow-800 transition-all font-body text-lg font-semibold shadow-lg">Entrar</button>
             </div>
         </div>
     </div>
 
-    <main class="max-w-7xl mx-auto px-4 py-12">
-        <div id="adminControls" style="display: none;" class="mb-8 flex justify-center">
-            <button id="addProductBtn" class="flex items-center gap-2 px-6 py-3 bg-pink-500 text-white rounded-lg hover:bg-pink-600 transition-colors shadow-lg">
-                <span>➕</span> Adicionar Produto
+    <main class="max-w-7xl mx-auto px-4 py-16">
+        <div id="adminControls" style="display: none;" class="mb-12 flex justify-center">
+            <button id="addProductBtn" class="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-600 to-yellow-700 text-white rounded-full hover:from-amber-700 hover:to-yellow-800 transition-all shadow-xl font-body text-lg font-semibold">
+                <span class="text-2xl">✨</span> Adicionar Produto
             </button>
         </div>
 
-        <div id="productForm" style="display: none;" class="mb-8 max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg">
-            <div class="flex justify-between items-center mb-4">
-                <h3 id="formTitle" class="text-xl font-bold text-gray-800">Novo Produto</h3>
-                <button id="closeForm" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+        <div id="productForm" style="display: none;" class="mb-12 max-w-lg mx-auto bg-gradient-to-br from-amber-50 to-yellow-50 p-8 rounded-2xl shadow-2xl border-2 border-amber-300">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="formTitle" class="text-2xl font-display font-bold text-amber-900">Novo Produto</h3>
+                <button id="closeForm" class="text-amber-600 hover:text-amber-900 text-3xl font-light">&times;</button>
             </div>
-            <div class="space-y-4">
+            <div class="space-y-5">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nome do Produto</label>
-                    <input type="text" id="productName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Ex: Perfume Floral">
+                    <label class="block text-sm font-body font-semibold text-amber-800 mb-2">Nome do Produto</label>
+                    <input type="text" id="productName" class="w-full px-4 py-3 border-2 border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white font-body" placeholder="Ex: Perfume Floral Elegance">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">URL da Imagem</label>
-                    <input type="text" id="productImage" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="https://...">
-                    <p class="text-xs text-gray-500 mt-1">Dica: Faça upload em imgur.com e cole o link aqui</p>
+                    <label class="block text-sm font-body font-semibold text-amber-800 mb-2">URL da Imagem</label>
+                    <input type="text" id="productImage" class="w-full px-4 py-3 border-2 border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white font-body" placeholder="https://...">
+                    <p class="text-xs text-amber-700 mt-2 font-body italic">💡 Dica: Faça upload em imgur.com e cole o link aqui</p>
                 </div>
-                <button id="saveProduct" class="w-full py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg hover:from-pink-600 hover:to-purple-700 transition-all font-medium">Adicionar Produto</button>
+                <button id="saveProduct" class="w-full py-4 bg-gradient-to-r from-amber-600 to-yellow-700 text-white rounded-lg hover:from-amber-700 hover:to-yellow-800 transition-all font-body text-lg font-semibold shadow-lg">Salvar Produto</button>
             </div>
         </div>
 
-        <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
-        <div id="emptyState" style="display: none;" class="text-center py-20">
-            <p class="text-gray-500 text-lg">Nenhum produto cadastrado ainda.</p>
+        <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"></div>
+        <div id="emptyState" style="display: none;" class="text-center py-32">
+            <p class="text-amber-700 text-2xl font-body italic">Nenhum produto cadastrado ainda.</p>
         </div>
     </main>
 
-    <footer class="bg-gradient-to-r from-pink-600 to-purple-600 text-white py-8 mt-20">
+    <footer class="bg-gradient-to-r from-amber-800 via-yellow-700 to-amber-800 text-amber-50 py-12 mt-24 border-t-4 border-amber-400">
         <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-lg font-serif">C.Freitas Perfumary</p>
-            <p class="text-sm mt-2 opacity-90">Fragrâncias que contam histórias</p>
+            <p class="text-2xl font-display font-bold tracking-wide">C.Freitas Perfumary</p>
+            <p class="text-base mt-3 opacity-90 font-body italic tracking-wider">Fragrâncias que contam histórias ✨</p>
         </div>
     </footer>
 
@@ -127,22 +150,22 @@
 
         async function loadProducts() {
             try {
-                const result = await window.storage.get('products-data', true);
+                const result = await window.storage.get('cfreitas-products', true);
                 if (result && result.value) {
                     products = JSON.parse(result.value);
                 } else {
                     products = [
                         { id: 1, name: 'Perfume Floral Elegance', image: 'https://images.unsplash.com/photo-1588405748880-12d1d2a59d75?w=400&h=400&fit=crop' },
                         { id: 2, name: 'Eau de Toilette Citrus', image: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400&h=400&fit=crop' },
-                        { id: 3, name: 'Perfume Amadeirado', image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop' }
+                        { id: 3, name: 'Perfume Amadeirado Luxo', image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop' }
                     ];
-                    await window.storage.set('products-data', JSON.stringify(products), true);
+                    await window.storage.set('cfreitas-products', JSON.stringify(products), true);
                 }
             } catch (error) {
                 products = [
                     { id: 1, name: 'Perfume Floral Elegance', image: 'https://images.unsplash.com/photo-1588405748880-12d1d2a59d75?w=400&h=400&fit=crop' },
                     { id: 2, name: 'Eau de Toilette Citrus', image: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400&h=400&fit=crop' },
-                    { id: 3, name: 'Perfume Amadeirado', image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop' }
+                    { id: 3, name: 'Perfume Amadeirado Luxo', image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop' }
                 ];
             }
             renderProducts();
@@ -150,8 +173,9 @@
 
         async function saveProducts() {
             try {
-                await window.storage.set('products-data', JSON.stringify(products), true);
-                showNotification('✅ Salvo! Visível em todos os dispositivos');
+                await window.storage.set('cfreitas-products', JSON.stringify(products), true);
+                showNotification('✅ Salvo com sucesso! Visível em todos os dispositivos');
+                setTimeout(loadProducts, 1000);
             } catch (error) {
                 console.error('Erro ao salvar:', error);
                 showNotification('❌ Erro ao salvar. Tente novamente.');
@@ -161,10 +185,13 @@
         function showNotification(message) {
             const notification = document.createElement('div');
             notification.textContent = message;
-            notification.className = 'fixed top-20 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-bounce';
+            notification.className = 'fixed top-24 right-6 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-4 rounded-xl shadow-2xl z-50 font-body font-semibold border-2 border-green-400';
+            notification.style.animation = 'float 0.5s ease-out';
             document.body.appendChild(notification);
             setTimeout(function() {
-                notification.remove();
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.5s';
+                setTimeout(function() { notification.remove(); }, 500);
             }, 3000);
         }
 
@@ -179,39 +206,38 @@
             
             elements.productsGrid.innerHTML = products.map(function(product) {
                 const adminButtons = isAdmin ? 
-                    '<div class="absolute top-2 right-2 flex gap-2">' +
-                    '<button onclick="editProduct(' + product.id + ')" class="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors shadow-lg">✏️</button>' +
-                    '<button onclick="deleteProduct(' + product.id + ')" class="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg">🗑️</button>' +
+                    '<div class="absolute top-3 right-3 flex gap-2">' +
+                    '<button onclick="editProduct(' + product.id + ')" class="p-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-all shadow-xl text-lg">✏️</button>' +
+                    '<button onclick="deleteProduct(' + product.id + ')" class="p-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all shadow-xl text-lg">🗑️</button>' +
                     '</div>' : '';
                 
-                return '<div class="group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">' +
-                    '<div class="relative h-64 overflow-hidden bg-gradient-to-br from-pink-100 to-purple-100">' +
-                    '<img src="' + product.image + '" alt="' + product.name + '" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">' +
+                return '<div class="group bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 border-2 border-amber-200 hover:border-amber-400">' +
+                    '<div class="relative h-72 overflow-hidden bg-gradient-to-br from-amber-100 to-yellow-100">' +
+                    '<img src="' + product.image + '" alt="' + product.name + '" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.src=\'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop\'">' +
+                    '<div class="absolute inset-0 bg-gradient-to-t from-amber-900/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>' +
                     adminButtons +
                     '</div>' +
-                    '<div class="p-6">' +
-                    '<h3 class="text-xl font-semibold text-gray-800 text-center">' + product.name + '</h3>' +
+                    '<div class="p-6 bg-gradient-to-b from-transparent to-amber-50/50">' +
+                    '<h3 class="text-2xl font-display font-bold text-amber-900 text-center leading-tight">' + product.name + '</h3>' +
                     '</div>' +
                     '</div>';
             }).join('');
         }
 
         setInterval(async function() {
-            if (!isAdmin) {
-                try {
-                    const result = await window.storage.get('products-data', true);
-                    if (result && result.value) {
-                        const newProducts = JSON.parse(result.value);
-                        if (JSON.stringify(newProducts) !== JSON.stringify(products)) {
-                            products = newProducts;
-                            renderProducts();
-                        }
+            try {
+                const result = await window.storage.get('cfreitas-products', true);
+                if (result && result.value) {
+                    const newProducts = JSON.parse(result.value);
+                    if (JSON.stringify(newProducts) !== JSON.stringify(products)) {
+                        products = newProducts;
+                        renderProducts();
                     }
-                } catch (error) {
-                    console.log('Erro ao atualizar produtos');
                 }
+            } catch (error) {
+                console.log('Verificando atualizações...');
             }
-        }, 5000);
+        }, 3000);
 
         elements.loginBtn.addEventListener('click', function() {
             elements.loginModal.style.display = 'flex';
@@ -239,6 +265,7 @@
                 elements.passwordInput.value = '';
                 elements.loginError.style.display = 'none';
                 renderProducts();
+                showNotification('🎉 Bem-vindo ao painel admin!');
             } else {
                 elements.loginError.style.display = 'block';
                 elements.passwordInput.value = '';
@@ -257,10 +284,11 @@
         elements.addProductBtn.addEventListener('click', function() {
             editingId = null;
             elements.formTitle.textContent = 'Novo Produto';
-            elements.saveProduct.textContent = 'Adicionar Produto';
+            elements.saveProduct.textContent = 'Salvar Produto';
             elements.productName.value = '';
             elements.productImage.value = '';
             elements.productForm.style.display = 'block';
+            window.scrollTo({ top: elements.productForm.offsetTop - 100, behavior: 'smooth' });
         });
 
         elements.closeForm.addEventListener('click', function() {
@@ -269,7 +297,10 @@
         });
 
         elements.saveProduct.addEventListener('click', async function() {
-            if (!elements.productName.value || !elements.productImage.value) return;
+            if (!elements.productName.value || !elements.productImage.value) {
+                showNotification('⚠️ Preencha todos os campos!');
+                return;
+            }
             
             if (editingId) {
                 products = products.map(function(p) {
@@ -284,7 +315,6 @@
             }
             
             await saveProducts();
-            renderProducts();
             elements.productForm.style.display = 'none';
             editingId = null;
         });
@@ -299,16 +329,17 @@
             elements.productName.value = product.name;
             elements.productImage.value = product.image;
             elements.productForm.style.display = 'block';
+            window.scrollTo({ top: elements.productForm.offsetTop - 100, behavior: 'smooth' });
         };
 
         window.deleteProduct = async function(id) {
             if (!confirm('Deseja realmente excluir este produto?')) return;
             products = products.filter(function(p) { return p.id !== id; });
             await saveProducts();
-            renderProducts();
         };
 
         loadProducts();
     </script>
 </body>
 </html>
+
