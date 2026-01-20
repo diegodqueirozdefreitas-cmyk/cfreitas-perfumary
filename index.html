@@ -1,135 +1,161 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>C Freitas Perfumary</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+  import {
+    getDatabase,
+    ref,
+    push,
+    onValue,
+    update,
+    remove
+  } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      margin: 0;
-      padding: 20px;
+  // 🔐 CONFIG FIREBASE
+  const firebaseConfig = {
+    apiKey: "AIzaSyCNcjKdISg8-X8QPFPY3pAqTCfjAa3Ie1M",
+    authDomain: "cfreitas-perfumary.firebaseapp.com",
+    projectId: "cfreitas-perfumary",
+    storageBucket: "cfreitas-perfumary.firebasestorage.app",
+    messagingSenderId: "459216808781",
+    appId: "1:459216808781:web:9a367e81b9d14c5c95e504"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const productsRef = ref(db, "produtos");
+
+  // 🔐 ADMIN
+  const ADMIN_PASSWORD = "cfreitas2025";
+  let isAdmin = false;
+  let editingId = null;
+
+  // ELEMENTOS
+  const el = {
+    loginBtn: document.getElementById("loginBtn"),
+    logoutBtn: document.getElementById("logoutBtn"),
+    loginModal: document.getElementById("loginModal"),
+    closeLoginModal: document.getElementById("closeLoginModal"),
+    passwordInput: document.getElementById("passwordInput"),
+    loginSubmit: document.getElementById("loginSubmit"),
+    loginError: document.getElementById("loginError"),
+    adminControls: document.getElementById("adminControls"),
+    addProductBtn: document.getElementById("addProductBtn"),
+    productForm: document.getElementById("productForm"),
+    closeForm: document.getElementById("closeForm"),
+    formTitle: document.getElementById("formTitle"),
+    productName: document.getElementById("productName"),
+    productImage: document.getElementById("productImage"),
+    saveProduct: document.getElementById("saveProduct"),
+    productsGrid: document.getElementById("productsGrid"),
+    emptyState: document.getElementById("emptyState")
+  };
+
+  // 🔐 LOGIN
+  function handleLogin() {
+    if (el.passwordInput.value === ADMIN_PASSWORD) {
+      isAdmin = true;
+      el.loginModal.style.display = "none";
+      el.loginBtn.style.display = "none";
+      el.logoutBtn.style.display = "flex";
+      el.adminControls.style.display = "flex";
+      el.loginError.style.display = "none";
+      renderProducts(currentProducts);
+    } else {
+      el.loginError.style.display = "block";
     }
+    el.passwordInput.value = "";
+  }
 
-    .container {
-      max-width: 900px;
-      margin: auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-    }
+  el.loginBtn.onclick = () => el.loginModal.style.display = "flex";
+  el.closeLoginModal.onclick = () => el.loginModal.style.display = "none";
+  el.loginSubmit.onclick = handleLogin;
 
-    h1 {
-      text-align: center;
-    }
+  el.logoutBtn.onclick = () => {
+    isAdmin = false;
+    el.loginBtn.style.display = "flex";
+    el.logoutBtn.style.display = "none";
+    el.adminControls.style.display = "none";
+    el.productForm.style.display = "none";
+    renderProducts(currentProducts);
+  };
 
-    .admin {
-      margin-bottom: 30px;
-      padding: 15px;
-      background: #eee;
-      border-radius: 10px;
-    }
+  // 📦 PRODUTOS
+  let currentProducts = [];
 
-    .admin input {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-    }
-
-    .admin button {
-      padding: 10px;
-      width: 100%;
-      background: black;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-
-    .produto {
-      text-align: center;
-    }
-
-    .produto img {
-      max-width: 250px;
-      margin-top: 15px;
-      border-radius: 10px;
-    }
-
-    .preco {
-      font-size: 22px;
-      color: green;
-      font-weight: bold;
-    }
-  </style>
-</head>
-
-<body>
-
-  <div class="container">
-    <h1>C Freitas Perfumary</h1>
-
-    <!-- 🔐 PAINEL ADMIN -->
-    <div class="admin">
-      <h2>Atualizar produto</h2>
-      <input id="nome" placeholder="Nome do produto">
-      <input id="preco" placeholder="Preço">
-      <input id="imagem" placeholder="URL da imagem">
-      <button onclick="salvarProduto()">Salvar produto</button>
-    </div>
-
-    <!-- 🛍️ PRODUTO -->
-    <div class="produto">
-      <h2 id="produtoNome">Carregando...</h2>
-      <p id="produtoPreco" class="preco"></p>
-      <img id="produtoImagem" src="" alt="Produto">
-    </div>
-  </div>
-
-  <!-- 🔥 FIREBASE -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCNcjKdISg8-X8QPFPY3pAqTCfjAa3Ie1M",
-      authDomain: "cfreitas-perfumary.firebaseapp.com",
-      databaseURL: "https://cfreitas-perfumary-default-rtdb.firebaseio.com",
-      projectId: "cfreitas-perfumary",
-      storageBucket: "cfreitas-perfumary.appspot.com",
-      messagingSenderId: "459216808781",
-      appId: "1:459216808781:web:9a367e81b9d14c5c95e504"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
-
-    // 💾 SALVAR PRODUTO
-    window.salvarProduto = function () {
-      const produto = {
-        nome: document.getElementById("nome").value,
-        preco: document.getElementById("preco").value,
-        imagem: document.getElementById("imagem").value
-      };
-
-      set(ref(database, "produtoAtual"), produto);
-    };
-
-    // 🔄 ATUALIZA EM TEMPO REAL
-    const produtoRef = ref(database, "produtoAtual");
-
-    onValue(produtoRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-
-        document.getElementById("produtoNome").innerText = data.nome;
-        document.getElementById("produtoPreco").innerText = "R$ " + data.preco;
-        document.getElementById("produtoImagem").src = data.imagem;
-      }
+  onValue(productsRef, snapshot => {
+    currentProducts = [];
+    snapshot.forEach(child => {
+      currentProducts.push({ id: child.key, ...child.val() });
     });
-  </script>
+    renderProducts(currentProducts);
+  });
 
-</body>
-</html>
+  function renderProducts(products) {
+    if (!products.length) {
+      el.productsGrid.style.display = "none";
+      el.emptyState.style.display = "block";
+      return;
+    }
+
+    el.productsGrid.style.display = "grid";
+    el.emptyState.style.display = "none";
+
+    el.productsGrid.innerHTML = products.map(p => `
+      <div class="relative bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl shadow-xl border-2 border-amber-200 overflow-hidden">
+        <img src="${p.image}" class="w-full h-72 object-cover">
+        ${isAdmin ? `
+          <div class="absolute top-3 right-3 flex gap-2">
+            <button onclick="editProduct('${p.id}')" class="p-3 bg-blue-500 text-white rounded-full">✏️</button>
+            <button onclick="deleteProduct('${p.id}')" class="p-3 bg-red-500 text-white rounded-full">🗑️</button>
+          </div>
+        ` : ""}
+        <div class="p-6 text-center">
+          <h3 class="text-2xl font-display font-bold text-amber-900">${p.name}</h3>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  // ➕ SALVAR
+  el.saveProduct.onclick = async () => {
+    if (!el.productName.value || !el.productImage.value) return;
+
+    if (editingId) {
+      await update(ref(db, "produtos/" + editingId), {
+        name: el.productName.value,
+        image: el.productImage.value
+      });
+    } else {
+      await push(productsRef, {
+        name: el.productName.value,
+        image: el.productImage.value
+      });
+    }
+
+    el.productForm.style.display = "none";
+    editingId = null;
+    el.productName.value = "";
+    el.productImage.value = "";
+  };
+
+  window.editProduct = id => {
+    const p = currentProducts.find(x => x.id === id);
+    if (!p) return;
+    editingId = id;
+    el.productName.value = p.name;
+    el.productImage.value = p.image;
+    el.productForm.style.display = "block";
+  };
+
+  window.deleteProduct = async id => {
+    if (confirm("Excluir produto?")) {
+      await remove(ref(db, "produtos/" + id));
+    }
+  };
+
+  el.addProductBtn.onclick = () => {
+    editingId = null;
+    el.productName.value = "";
+    el.productImage.value = "";
+    el.productForm.style.display = "block";
+  };
+</script>
