@@ -2,159 +2,219 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>C.Freitas Perfumary</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Montserrat:wght@500;600&display=swap" rel="stylesheet">
+<title>C Freitas Perfumary</title>
 
 <style>
 body{
-  background: linear-gradient(135deg,#f5efe6,#e8dccf);
-  font-family:'Montserrat',sans-serif;
+  margin:0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg,#f3e6d3,#d8c1a3);
+  color:#4a2e1a;
 }
 
-/* LOGO */
-.logo-box{
-  background: linear-gradient(135deg,#f5efe6,#7a5c48);
+/* TOPO */
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px;
+}
+
+.logo h1{
+  margin:0;
+  font-size:42px;
+  background: linear-gradient(90deg,#d4af37,#f5deb3,#d4af37);
+  -webkit-background-clip:text;
+  color:transparent;
+  animation: brilho 3s linear infinite;
+}
+
+.logo span{
+  display:inline-block;
+  margin-top:5px;
+  padding:6px 20px;
+  background: linear-gradient(90deg,#d4af37,#b08d57);
+  color:white;
   border-radius:20px;
-  padding:18px 30px;
-  position:relative;
-  overflow:hidden;
-  box-shadow:0 10px 30px rgba(0,0,0,.25);
+  animation: faixa 2s infinite alternate;
 }
-.logo-text{
-  font-family:'Playfair Display',serif;
-  font-size:32px;
-  letter-spacing:3px;
-  color:#3b2a21;
+
+@keyframes brilho{
+  from{background-position:0%}
+  to{background-position:200%}
 }
-.logo-sub{
-  font-size:12px;
-  letter-spacing:5px;
-  margin-top:4px;
+@keyframes faixa{
+  from{opacity:.7}
+  to{opacity:1}
 }
-.gold-bar{
-  position:absolute;
-  bottom:0;
-  left:-100%;
-  width:200%;
-  height:6px;
-  background:linear-gradient(90deg,#8b6b2e,#e6c36a,#fff1a8,#e6c36a,#8b6b2e);
-  animation:goldMove 3s linear infinite;
+
+/* BOTAO ADMIN */
+#adminBtn{
+  background:#8b5a2b;
+  color:white;
+  padding:10px 20px;
+  border-radius:25px;
+  cursor:pointer;
+  font-weight:bold;
 }
-@keyframes goldMove{
-  to{transform:translateX(50%)}
+
+/* PRODUTOS */
+#produtos{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+  padding:20px;
+}
+
+.card{
+  background:#fff7ed;
+  border-radius:15px;
+  padding:15px;
+  box-shadow:0 4px 12px rgba(0,0,0,.2);
+  text-align:center;
+}
+
+.card img{
+  width:100%;
+  height:200px;
+  object-fit:cover;
+  border-radius:10px;
+}
+
+.card h3{margin:10px 0 5px}
+.card p{font-weight:bold;color:#8b5a2b}
+
+/* MODAL ADMIN */
+#admin{
+  display:none;
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,.6);
+}
+
+#adminBox{
+  background:#fff7ed;
+  max-width:400px;
+  margin:80px auto;
+  padding:20px;
+  border-radius:15px;
+}
+
+#adminBox input,button{
+  width:100%;
+  margin:8px 0;
+  padding:10px;
+}
+
+button{
+  background:#8b5a2b;
+  color:white;
+  border:none;
+  cursor:pointer;
+  border-radius:8px;
 }
 </style>
+</head>
 
-<!-- FIREBASE -->
+<body>
+
+<header>
+  <div class="logo">
+    <h1>C FREITAS</h1>
+    <span>Perfumary</span>
+  </div>
+
+  <div id="adminBtn">ADMIN</div>
+</header>
+
+<div id="produtos"></div>
+
+<!-- ADMIN -->
+<div id="admin">
+  <div id="adminBox">
+    <h2>Área Admin</h2>
+
+    <div id="login">
+      <input id="senha" type="password" placeholder="Senha">
+      <button onclick="login()">Entrar</button>
+    </div>
+
+    <div id="painel" style="display:none">
+      <input id="nome" placeholder="Nome do produto">
+      <input id="preco" placeholder="Preço">
+      <input id="img" placeholder="URL da imagem (.jpg .png .webp)">
+      <button onclick="salvar()">Salvar produto</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCNcjKdISg8-X8QPFPY3pAqTCfjAa3Ie1M",
   authDomain: "cfreitas-perfumary.firebaseapp.com",
   projectId: "cfreitas-perfumary",
-  databaseURL: "https://cfreitas-perfumary-default-rtdb.firebaseio.com",
+  storageBucket: "cfreitas-perfumary.firebasestorage.app",
+  messagingSenderId: "459216808781",
+  appId: "1:459216808781:web:9a367e81b9d14c5c95e504",
+  databaseURL:"https://cfreitas-perfumary-default-rtdb.firebaseio.com/"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const productsRef = ref(db, "products");
+const produtosRef = ref(db,"produtos");
 
-const ADMIN_PASSWORD = "cfreitas2025";
-let isAdmin = false;
-let editingId = null;
+const produtosDiv = document.getElementById("produtos");
 
-window.onload = () => {
-  const grid = document.getElementById("productsGrid");
-
-  onValue(productsRef, snap => {
-    grid.innerHTML = "";
-    snap.forEach(child => {
-      const p = child.val();
-      const id = child.key;
-
-      grid.innerHTML += `
-      <div class="bg-white rounded-xl shadow-xl overflow-hidden relative">
-        <img src="${p.image}" class="w-full h-64 object-cover"
-        onerror="this.src='https://via.placeholder.com/400x400?text=Imagem+Inválida'">
-        ${isAdmin ? `
-        <div class="absolute top-2 right-2 flex gap-2">
-          <button onclick="editProduct('${id}','${p.name}','${p.image}')" class="bg-blue-500 text-white px-3 py-1 rounded">✏</button>
-          <button onclick="deleteProduct('${id}')" class="bg-red-500 text-white px-3 py-1 rounded">🗑</button>
-        </div>` : ``}
-        <div class="p-4 text-center font-semibold">${p.name}</div>
+onValue(produtosRef,(snap)=>{
+  produtosDiv.innerHTML="";
+  snap.forEach(p=>{
+    const d = p.val();
+    produtosDiv.innerHTML += `
+      <div class="card">
+        <img src="${d.img}">
+        <h3>${d.nome}</h3>
+        <p>R$ ${d.preco}</p>
       </div>`;
-    });
   });
+});
 
-  document.getElementById("loginBtn").onclick = () => {
-    const pass = prompt("Senha admin:");
-    if(pass === ADMIN_PASSWORD){
-      isAdmin = true;
-      document.getElementById("adminPanel").classList.remove("hidden");
-      alert("Admin ativado");
-    } else alert("Senha errada");
-  };
+window.login = ()=>{
+  if(document.getElementById("senha").value === "cfreitas2025"){
+    document.getElementById("login").style.display="none";
+    document.getElementById("painel").style.display="block";
+  } else {
+    alert("Senha errada");
+  }
+}
 
-  document.getElementById("saveProduct").onclick = () => {
-    const name = productName.value;
-    const image = productImage.value;
+window.salvar = ()=>{
+  const nome = document.getElementById("nome").value;
+  const preco = document.getElementById("preco").value;
+  const img = document.getElementById("img").value;
 
-    if(!name || !image) return alert("Preencha tudo");
+  if(!img.startsWith("http")){
+    alert("URL de imagem inválida");
+    return;
+  }
 
-    if(editingId){
-      update(ref(db,"products/"+editingId),{name,image});
-      editingId = null;
-    }else{
-      push(productsRef,{name,image});
-    }
+  push(produtosRef,{nome,preco,img});
 
-    productName.value="";
-    productImage.value="";
-  };
-};
+  document.getElementById("nome").value="";
+  document.getElementById("preco").value="";
+  document.getElementById("img").value="";
+}
 
-window.deleteProduct = id => remove(ref(db,"products/"+id));
-
-window.editProduct = (id,name,image) => {
-  editingId = id;
-  productName.value = name;
-  productImage.value = image;
-};
+document.getElementById("adminBtn").onclick = ()=>{
+  document.getElementById("admin").style.display="block";
+}
+document.getElementById("admin").onclick = e=>{
+  if(e.target.id==="admin") e.target.style.display="none";
+}
 </script>
-</head>
-
-<body>
-
-<header class="flex justify-center py-8">
-  <div class="logo-box text-center">
-    <div class="logo-text">CFREITAS</div>
-    <div class="logo-sub">PERFUMARY</div>
-    <div class="gold-bar"></div>
-  </div>
-</header>
-
-<div class="text-center mb-6">
-  <button id="loginBtn" class="bg-amber-700 text-white px-6 py-2 rounded-full shadow-lg">
-    🔒 Admin
-  </button>
-</div>
-
-<div id="adminPanel" class="hidden max-w-md mx-auto bg-white p-6 rounded-xl shadow-xl mb-10">
-  <h2 class="text-xl font-semibold mb-4 text-center">Painel Admin</h2>
-  <input id="productName" placeholder="Nome do produto" class="w-full border p-2 mb-3">
-  <input id="productImage" placeholder="URL da imagem (termina em .jpg/.png)" class="w-full border p-2 mb-3">
-  <button id="saveProduct" class="w-full bg-green-600 text-white py-2 rounded">Salvar</button>
-</div>
-
-<main class="max-w-7xl mx-auto px-6">
-  <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-8"></div>
-</main>
 
 </body>
 </html>
