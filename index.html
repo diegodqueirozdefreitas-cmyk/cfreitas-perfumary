@@ -1,215 +1,160 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>Cfreitas Perfumary</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C.Freitas Perfumary</title>
 
-  <!-- Tailwind -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            gold: "#C9A24D",
-            beige: "#F5EFE6",
-            brown: "#5C4033"
-          }
-        }
-      }
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Montserrat:wght@500;600&display=swap" rel="stylesheet">
+
+<style>
+body{
+  background: linear-gradient(135deg,#f5efe6,#e8dccf);
+  font-family:'Montserrat',sans-serif;
+}
+
+/* LOGO */
+.logo-box{
+  background: linear-gradient(135deg,#f5efe6,#7a5c48);
+  border-radius:20px;
+  padding:18px 30px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+.logo-text{
+  font-family:'Playfair Display',serif;
+  font-size:32px;
+  letter-spacing:3px;
+  color:#3b2a21;
+}
+.logo-sub{
+  font-size:12px;
+  letter-spacing:5px;
+  margin-top:4px;
+}
+.gold-bar{
+  position:absolute;
+  bottom:0;
+  left:-100%;
+  width:200%;
+  height:6px;
+  background:linear-gradient(90deg,#8b6b2e,#e6c36a,#fff1a8,#e6c36a,#8b6b2e);
+  animation:goldMove 3s linear infinite;
+}
+@keyframes goldMove{
+  to{transform:translateX(50%)}
+}
+</style>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCNcjKdISg8-X8QPFPY3pAqTCfjAa3Ie1M",
+  authDomain: "cfreitas-perfumary.firebaseapp.com",
+  projectId: "cfreitas-perfumary",
+  databaseURL: "https://cfreitas-perfumary-default-rtdb.firebaseio.com",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const productsRef = ref(db, "products");
+
+const ADMIN_PASSWORD = "cfreitas2025";
+let isAdmin = false;
+let editingId = null;
+
+window.onload = () => {
+  const grid = document.getElementById("productsGrid");
+
+  onValue(productsRef, snap => {
+    grid.innerHTML = "";
+    snap.forEach(child => {
+      const p = child.val();
+      const id = child.key;
+
+      grid.innerHTML += `
+      <div class="bg-white rounded-xl shadow-xl overflow-hidden relative">
+        <img src="${p.image}" class="w-full h-64 object-cover"
+        onerror="this.src='https://via.placeholder.com/400x400?text=Imagem+Inválida'">
+        ${isAdmin ? `
+        <div class="absolute top-2 right-2 flex gap-2">
+          <button onclick="editProduct('${id}','${p.name}','${p.image}')" class="bg-blue-500 text-white px-3 py-1 rounded">✏</button>
+          <button onclick="deleteProduct('${id}')" class="bg-red-500 text-white px-3 py-1 rounded">🗑</button>
+        </div>` : ``}
+        <div class="p-4 text-center font-semibold">${p.name}</div>
+      </div>`;
+    });
+  });
+
+  document.getElementById("loginBtn").onclick = () => {
+    const pass = prompt("Senha admin:");
+    if(pass === ADMIN_PASSWORD){
+      isAdmin = true;
+      document.getElementById("adminPanel").classList.remove("hidden");
+      alert("Admin ativado");
+    } else alert("Senha errada");
+  };
+
+  document.getElementById("saveProduct").onclick = () => {
+    const name = productName.value;
+    const image = productImage.value;
+
+    if(!name || !image) return alert("Preencha tudo");
+
+    if(editingId){
+      update(ref(db,"products/"+editingId),{name,image});
+      editingId = null;
+    }else{
+      push(productsRef,{name,image});
     }
-  </script>
+
+    productName.value="";
+    productImage.value="";
+  };
+};
+
+window.deleteProduct = id => remove(ref(db,"products/"+id));
+
+window.editProduct = (id,name,image) => {
+  editingId = id;
+  productName.value = name;
+  productImage.value = image;
+};
+</script>
 </head>
 
-<body class="bg-beige min-h-screen text-brown">
+<body>
 
-<!-- HEADER -->
-<header class="bg-gradient-to-r from-brown to-gold text-white shadow-lg">
-  <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
-    <div class="flex items-center gap-3">
-      <div class="w-12 h-12 rounded-full bg-white text-brown flex items-center justify-center font-bold text-xl">
-        CF
-      </div>
-      <h1 class="text-2xl font-bold tracking-wide">Cfreitas Perfumary</h1>
-    </div>
-
-    <div class="flex gap-3">
-      <button id="loginBtn" class="bg-white text-brown px-5 py-2 rounded-full font-semibold hover:bg-beige">
-        Área Admin
-      </button>
-      <button id="logoutBtn" class="hidden bg-red-600 px-5 py-2 rounded-full font-semibold">
-        Sair
-      </button>
-    </div>
+<header class="flex justify-center py-8">
+  <div class="logo-box text-center">
+    <div class="logo-text">CFREITAS</div>
+    <div class="logo-sub">PERFUMARY</div>
+    <div class="gold-bar"></div>
   </div>
 </header>
 
-<!-- ADMIN CONTROLS -->
-<section id="adminControls" class="hidden max-w-7xl mx-auto p-6">
-  <button id="addProductBtn"
-    class="bg-gold text-white px-6 py-3 rounded-xl font-bold shadow hover:opacity-90">
-    ➕ Adicionar Produto
+<div class="text-center mb-6">
+  <button id="loginBtn" class="bg-amber-700 text-white px-6 py-2 rounded-full shadow-lg">
+    🔒 Admin
   </button>
-</section>
+</div>
 
-<!-- PRODUTOS -->
-<main class="max-w-7xl mx-auto px-6 pb-16">
-  <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8"></div>
+<div id="adminPanel" class="hidden max-w-md mx-auto bg-white p-6 rounded-xl shadow-xl mb-10">
+  <h2 class="text-xl font-semibold mb-4 text-center">Painel Admin</h2>
+  <input id="productName" placeholder="Nome do produto" class="w-full border p-2 mb-3">
+  <input id="productImage" placeholder="URL da imagem (termina em .jpg/.png)" class="w-full border p-2 mb-3">
+  <button id="saveProduct" class="w-full bg-green-600 text-white py-2 rounded">Salvar</button>
+</div>
 
-  <div id="emptyState" class="hidden text-center py-20 text-xl opacity-60">
-    Nenhum produto cadastrado
-  </div>
+<main class="max-w-7xl mx-auto px-6">
+  <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-8"></div>
 </main>
-
-<!-- MODAL LOGIN -->
-<div id="loginModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-  <div class="bg-white rounded-2xl p-8 w-80 shadow-xl">
-    <h2 class="text-2xl font-bold text-center mb-6">Área Administrativa</h2>
-    <input id="passwordInput" type="password" placeholder="Senha"
-      class="w-full border px-4 py-3 rounded-lg mb-3">
-    <p id="loginError" class="hidden text-red-600 text-sm mb-3 text-center">
-      Senha incorreta
-    </p>
-    <button id="loginSubmit"
-      class="w-full bg-brown text-white py-3 rounded-lg font-semibold">
-      Entrar
-    </button>
-  </div>
-</div>
-
-<!-- MODAL PRODUTO -->
-<div id="productForm" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-  <div class="bg-white rounded-2xl p-8 w-96 shadow-xl">
-    <h2 class="text-xl font-bold mb-4">Produto</h2>
-    <input id="productName" placeholder="Nome do produto"
-      class="w-full border px-4 py-3 rounded-lg mb-3">
-    <input id="productImage" placeholder="URL da imagem"
-      class="w-full border px-4 py-3 rounded-lg mb-5">
-    <div class="flex gap-3">
-      <button id="saveProduct"
-        class="flex-1 bg-gold text-white py-3 rounded-lg font-bold">
-        Salvar
-      </button>
-      <button id="closeForm"
-        class="flex-1 bg-gray-300 py-3 rounded-lg font-bold">
-        Cancelar
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- FIREBASE + SCRIPT -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-  import { getDatabase, ref, push, onValue, update, remove }
-    from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyCNcjKdISg8-X8QPFPY3pAqTCfjAa3Ie1M",
-    authDomain: "cfreitas-perfumary.firebaseapp.com",
-    projectId: "cfreitas-perfumary",
-    storageBucket: "cfreitas-perfumary.firebasestorage.app",
-    messagingSenderId: "459216808781",
-    appId: "1:459216808781:web:9a367e81b9d14c5c95e504"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const productsRef = ref(db, "produtos");
-
-  const ADMIN_PASSWORD = "cfreitas2025";
-  let isAdmin = false;
-  let editingId = null;
-  let products = [];
-
-  const $ = id => document.getElementById(id);
-
-  $("loginBtn").onclick = () => $("loginModal").classList.remove("hidden");
-  $("loginSubmit").onclick = () => {
-    if ($("passwordInput").value === ADMIN_PASSWORD) {
-      isAdmin = true;
-      $("loginModal").classList.add("hidden");
-      $("loginBtn").classList.add("hidden");
-      $("logoutBtn").classList.remove("hidden");
-      $("adminControls").classList.remove("hidden");
-      render();
-    } else {
-      $("loginError").classList.remove("hidden");
-    }
-    $("passwordInput").value = "";
-  };
-
-  $("logoutBtn").onclick = () => {
-    isAdmin = false;
-    $("loginBtn").classList.remove("hidden");
-    $("logoutBtn").classList.add("hidden");
-    $("adminControls").classList.add("hidden");
-    render();
-  };
-
-  $("addProductBtn").onclick = () => {
-    editingId = null;
-    $("productForm").classList.remove("hidden");
-  };
-
-  $("closeForm").onclick = () => $("productForm").classList.add("hidden");
-
-  $("saveProduct").onclick = async () => {
-    const name = $("productName").value;
-    const image = $("productImage").value;
-    if (!name || !image) return;
-
-    if (editingId) {
-      await update(ref(db, "produtos/" + editingId), { name, image });
-    } else {
-      await push(productsRef, { name, image });
-    }
-
-    $("productForm").classList.add("hidden");
-    $("productName").value = "";
-    $("productImage").value = "";
-  };
-
-  onValue(productsRef, snap => {
-    products = [];
-    snap.forEach(c => products.push({ id: c.key, ...c.val() }));
-    render();
-  });
-
-  window.editProduct = id => {
-    const p = products.find(x => x.id === id);
-    editingId = id;
-    $("productName").value = p.name;
-    $("productImage").value = p.image;
-    $("productForm").classList.remove("hidden");
-  };
-
-  window.deleteProduct = id => {
-    if (confirm("Excluir produto?")) remove(ref(db, "produtos/" + id));
-  };
-
-  function render() {
-    const grid = $("productsGrid");
-    if (!products.length) {
-      $("emptyState").classList.remove("hidden");
-      grid.innerHTML = "";
-      return;
-    }
-    $("emptyState").classList.add("hidden");
-    grid.innerHTML = products.map(p => `
-      <div class="bg-white rounded-2xl shadow-xl overflow-hidden border">
-        <img src="${p.image}" class="h-64 w-full object-cover">
-        <div class="p-5 text-center font-bold">${p.name}</div>
-        ${isAdmin ? `
-          <div class="flex gap-2 p-4">
-            <button onclick="editProduct('${p.id}')" class="flex-1 bg-blue-500 text-white py-2 rounded">Editar</button>
-            <button onclick="deleteProduct('${p.id}')" class="flex-1 bg-red-500 text-white py-2 rounded">Excluir</button>
-          </div>` : ``}
-      </div>
-    `).join("");
-  }
-</script>
 
 </body>
 </html>
