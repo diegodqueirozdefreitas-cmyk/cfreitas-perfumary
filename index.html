@@ -1,177 +1,135 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>C.Freitas Perfumary</title>
+  <meta charset="UTF-8">
+  <title>C Freitas Perfumary</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
 
-<style>
-@keyframes float {0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-.float{animation:float 3s ease-in-out infinite}
-.font-display{font-family:'Playfair Display',serif}
-.font-body{font-family:'Cormorant Garamond',serif}
-body{background:linear-gradient(135deg,#F5F5DC,#FAF0E6,#FFF8DC,#F5DEB3,#F5F5DC)}
-</style>
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .admin {
+      margin-bottom: 30px;
+      padding: 15px;
+      background: #eee;
+      border-radius: 10px;
+    }
+
+    .admin input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+    }
+
+    .admin button {
+      padding: 10px;
+      width: 100%;
+      background: black;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .produto {
+      text-align: center;
+    }
+
+    .produto img {
+      max-width: 250px;
+      margin-top: 15px;
+      border-radius: 10px;
+    }
+
+    .preco {
+      font-size: 22px;
+      color: green;
+      font-weight: bold;
+    }
+  </style>
 </head>
 
-<body class="min-h-screen">
+<body>
 
-<header class="bg-amber-50 shadow-lg sticky top-0 z-50 border-b-2 border-amber-200">
-<div class="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
+  <div class="container">
+    <h1>C Freitas Perfumary</h1>
 
-<h1 class="text-4xl font-display font-black text-amber-800">C.Freitas</h1>
+    <!-- 🔐 PAINEL ADMIN -->
+    <div class="admin">
+      <h2>Atualizar produto</h2>
+      <input id="nome" placeholder="Nome do produto">
+      <input id="preco" placeholder="Preço">
+      <input id="imagem" placeholder="URL da imagem">
+      <button onclick="salvarProduto()">Salvar produto</button>
+    </div>
 
-<button id="loginBtn" class="px-6 py-3 bg-amber-600 text-white rounded-full">🔒 Admin</button>
-<button id="logoutBtn" style="display:none" class="px-6 py-3 bg-red-600 text-white rounded-full">🚪 Sair</button>
+    <!-- 🛍️ PRODUTO -->
+    <div class="produto">
+      <h2 id="produtoNome">Carregando...</h2>
+      <p id="produtoPreco" class="preco"></p>
+      <img id="produtoImagem" src="" alt="Produto">
+    </div>
+  </div>
 
-</div>
-</header>
+  <!-- 🔥 FIREBASE -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
 
-<!-- LOGIN -->
-<div id="loginModal" style="display:none" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-<div class="bg-white p-6 rounded-xl w-80">
-<h3 class="text-xl mb-4 font-display">Login Admin</h3>
-<input id="passwordInput" type="password" placeholder="Senha" class="w-full border p-2 mb-3">
-<p id="loginError" style="display:none" class="text-red-600 text-sm mb-2">Senha incorreta</p>
-<button id="loginSubmit" class="w-full bg-amber-600 text-white py-2 rounded">Entrar</button>
-</div>
-</div>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCNcjKdISg8-X8QPFPY3pAqTCfjAa3Ie1M",
+      authDomain: "cfreitas-perfumary.firebaseapp.com",
+      databaseURL: "https://cfreitas-perfumary-default-rtdb.firebaseio.com",
+      projectId: "cfreitas-perfumary",
+      storageBucket: "cfreitas-perfumary.appspot.com",
+      messagingSenderId: "459216808781",
+      appId: "1:459216808781:web:9a367e81b9d14c5c95e504"
+    };
 
-<main class="max-w-7xl mx-auto px-4 py-16">
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
 
-<div id="adminControls" style="display:none" class="text-center mb-10">
-<button id="addProductBtn" class="px-8 py-3 bg-amber-600 text-white rounded-full">✨ Adicionar Produto</button>
-</div>
+    // 💾 SALVAR PRODUTO
+    window.salvarProduto = function () {
+      const produto = {
+        nome: document.getElementById("nome").value,
+        preco: document.getElementById("preco").value,
+        imagem: document.getElementById("imagem").value
+      };
 
-<!-- FORM -->
-<div id="productForm" style="display:none" class="max-w-md mx-auto bg-white p-6 rounded-xl shadow mb-10">
-<h3 id="formTitle" class="text-xl mb-4">Novo Produto</h3>
+      set(ref(database, "produtoAtual"), produto);
+    };
 
-<input id="productName" placeholder="Nome do produto" class="w-full border p-2 mb-3">
-<input id="productImage" placeholder="URL da imagem" class="w-full border p-2 mb-4">
+    // 🔄 ATUALIZA EM TEMPO REAL
+    const produtoRef = ref(database, "produtoAtual");
 
-<button id="saveProduct" class="w-full bg-amber-600 text-white py-2 rounded">Salvar</button>
-</div>
+    onValue(produtoRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
 
-<div id="productsGrid" class="grid md:grid-cols-3 gap-8"></div>
-<p id="emptyState" style="display:none" class="text-center text-xl">Nenhum produto cadastrado</p>
-
-</main>
-
-<script>
-const ADMIN_PASSWORD = "cfreitas2025"
-let isAdmin = false
-let products = []
-let editingId = null
-
-const el = id => document.getElementById(id)
-
-/* ===== STORAGE ===== */
-function loadProducts(){
-const data = localStorage.getItem("cfreitas-products")
-products = data ? JSON.parse(data) : []
-renderProducts()
-}
-
-function saveProducts(){
-localStorage.setItem("cfreitas-products", JSON.stringify(products))
-alert("✅ Produto salvo com sucesso!")
-renderProducts()
-}
-
-/* ===== RENDER ===== */
-function renderProducts(){
-const grid = el("productsGrid")
-grid.innerHTML = ""
-
-if(products.length === 0){
-el("emptyState").style.display = "block"
-return
-}
-el("emptyState").style.display = "none"
-
-products.forEach(p=>{
-grid.innerHTML += `
-<div class="bg-white rounded-xl shadow p-4 relative">
-<img src="${p.image}" class="h-48 w-full object-cover rounded mb-3">
-<h3 class="text-lg font-bold text-center">${p.name}</h3>
-
-${isAdmin ? `
-<div class="flex gap-2 justify-center mt-3">
-<button onclick="editProduct(${p.id})" class="bg-blue-500 text-white px-3 py-1 rounded">✏️</button>
-<button onclick="deleteProduct(${p.id})" class="bg-red-500 text-white px-3 py-1 rounded">🗑️</button>
-</div>` : ""}
-</div>`
-})
-}
-
-/* ===== LOGIN ===== */
-el("loginBtn").onclick = ()=> el("loginModal").style.display="flex"
-
-el("loginSubmit").onclick = ()=>{
-if(el("passwordInput").value === ADMIN_PASSWORD){
-isAdmin = true
-el("loginModal").style.display="none"
-el("loginBtn").style.display="none"
-el("logoutBtn").style.display="inline-block"
-el("adminControls").style.display="block"
-renderProducts()
-}else{
-el("loginError").style.display="block"
-}
-}
-
-el("logoutBtn").onclick = ()=>{
-isAdmin=false
-el("loginBtn").style.display="inline-block"
-el("logoutBtn").style.display="none"
-el("adminControls").style.display="none"
-renderProducts()
-}
-
-/* ===== CRUD ===== */
-el("addProductBtn").onclick = ()=>{
-editingId=null
-el("productForm").style.display="block"
-el("productName").value=""
-el("productImage").value=""
-}
-
-el("saveProduct").onclick = ()=>{
-const name = el("productName").value
-const img = el("productImage").value
-if(!name || !img) return alert("Preencha tudo")
-
-if(editingId){
-products = products.map(p=>p.id===editingId?{id:p.id,name,img}:p)
-}else{
-products.push({id:Date.now(),name,img})
-}
-
-saveProducts()
-el("productForm").style.display="none"
-}
-
-window.editProduct = id=>{
-const p = products.find(x=>x.id===id)
-editingId=id
-el("productName").value=p.name
-el("productImage").value=p.image
-el("productForm").style.display="block"
-}
-
-window.deleteProduct = id=>{
-if(confirm("Excluir produto?")){
-products = products.filter(p=>p.id!==id)
-saveProducts()
-}
-}
-
-loadProducts()
-</script>
+        document.getElementById("produtoNome").innerText = data.nome;
+        document.getElementById("produtoPreco").innerText = "R$ " + data.preco;
+        document.getElementById("produtoImagem").src = data.imagem;
+      }
+    });
+  </script>
 
 </body>
 </html>
