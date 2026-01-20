@@ -1,220 +1,344 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>C Freitas Perfumary</title>
-
-<style>
-body{
-  margin:0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg,#f3e6d3,#d8c1a3);
-  color:#4a2e1a;
-}
-
-/* TOPO */
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:20px;
-}
-
-.logo h1{
-  margin:0;
-  font-size:42px;
-  background: linear-gradient(90deg,#d4af37,#f5deb3,#d4af37);
-  -webkit-background-clip:text;
-  color:transparent;
-  animation: brilho 3s linear infinite;
-}
-
-.logo span{
-  display:inline-block;
-  margin-top:5px;
-  padding:6px 20px;
-  background: linear-gradient(90deg,#d4af37,#b08d57);
-  color:white;
-  border-radius:20px;
-  animation: faixa 2s infinite alternate;
-}
-
-@keyframes brilho{
-  from{background-position:0%}
-  to{background-position:200%}
-}
-@keyframes faixa{
-  from{opacity:.7}
-  to{opacity:1}
-}
-
-/* BOTAO ADMIN */
-#adminBtn{
-  background:#8b5a2b;
-  color:white;
-  padding:10px 20px;
-  border-radius:25px;
-  cursor:pointer;
-  font-weight:bold;
-}
-
-/* PRODUTOS */
-#produtos{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:20px;
-  padding:20px;
-}
-
-.card{
-  background:#fff7ed;
-  border-radius:15px;
-  padding:15px;
-  box-shadow:0 4px 12px rgba(0,0,0,.2);
-  text-align:center;
-}
-
-.card img{
-  width:100%;
-  height:200px;
-  object-fit:cover;
-  border-radius:10px;
-}
-
-.card h3{margin:10px 0 5px}
-.card p{font-weight:bold;color:#8b5a2b}
-
-/* MODAL ADMIN */
-#admin{
-  display:none;
-  position:fixed;
-  top:0;left:0;
-  width:100%;height:100%;
-  background:rgba(0,0,0,.6);
-}
-
-#adminBox{
-  background:#fff7ed;
-  max-width:400px;
-  margin:80px auto;
-  padding:20px;
-  border-radius:15px;
-}
-
-#adminBox input,button{
-  width:100%;
-  margin:8px 0;
-  padding:10px;
-}
-
-button{
-  background:#8b5a2b;
-  color:white;
-  border:none;
-  cursor:pointer;
-  border-radius:8px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C.Freitas Perfumary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        @keyframes glow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(218, 165, 32, 0.3),
+                            0 0 40px rgba(218, 165, 32, 0.2),
+                            0 0 60px rgba(218, 165, 32, 0.1);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(218, 165, 32, 0.5),
+                            0 0 60px rgba(218, 165, 32, 0.3),
+                            0 0 80px rgba(218, 165, 32, 0.2);
+            }
+        }
+        .float { animation: float 3s ease-in-out infinite; }
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(218, 165, 32, 0.3), transparent);
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite;
+        }
+        .glow { animation: glow 2s ease-in-out infinite; }
+        .font-display { font-family: 'Playfair Display', serif; }
+        .font-body { font-family: 'Cormorant Garamond', serif; }
+        body { background: linear-gradient(135deg, #F5F5DC 0%, #FAF0E6 25%, #FFF8DC 50%, #F5DEB3 75%, #F5F5DC 100%); }
+    </style>
 </head>
+<body class="min-h-screen">
+    <header class="bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-50 shadow-lg sticky top-0 z-50 border-b-2 border-amber-200">
+        <div class="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
+            <div class="flex items-center gap-6">
+                <div class="relative w-20 h-20 float">
+                    <div class="absolute inset-0 bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-600 rounded-full glow"></div>
+                    <div class="absolute inset-1 bg-gradient-to-br from-amber-50 to-yellow-100 rounded-full"></div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="text-5xl font-display font-black bg-gradient-to-br from-amber-600 via-yellow-700 to-amber-800 bg-clip-text text-transparent drop-shadow-lg">C</span>
+                    </div>
+                    <div class="absolute inset-0 border-3 border-amber-400 rounded-full shimmer"></div>
+                    <div class="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping"></div>
+                </div>
+                <div>
+                    <h1 class="text-5xl font-display font-black bg-gradient-to-r from-amber-700 via-yellow-600 to-amber-800 bg-clip-text text-transparent drop-shadow-md tracking-tight">C.Freitas</h1>
+                    <p class="text-lg font-body text-amber-700 italic tracking-widest mt-1">PERFUMARY</p>
+                </div>
+            </div>
+            <button id="loginBtn" class="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-600 to-yellow-700 text-white rounded-full hover:from-amber-700 hover:to-yellow-800 transition-all shadow-lg font-body text-base font-semibold">
+                <span>🔒</span> Admin
+            </button>
+            <button id="logoutBtn" style="display: none;" class="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-full hover:from-red-700 hover:to-red-800 transition-all shadow-lg font-body text-base font-semibold">
+                <span>🚪</span> Sair
+            </button>
+        </div>
+    </header>
 
-<body>
-
-<header>
-  <div class="logo">
-    <h1>C FREITAS</h1>
-    <span>Perfumary</span>
-  </div>
-
-  <div id="adminBtn">ADMIN</div>
-</header>
-
-<div id="produtos"></div>
-
-<!-- ADMIN -->
-<div id="admin">
-  <div id="adminBox">
-    <h2>Área Admin</h2>
-
-    <div id="login">
-      <input id="senha" type="password" placeholder="Senha">
-      <button onclick="login()">Entrar</button>
+    <div id="loginModal" style="display: none;" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl shadow-2xl max-w-md w-full p-8 border-2 border-amber-300">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-display font-bold text-amber-900">Login Administrativo</h3>
+                <button id="closeLoginModal" class="text-amber-600 hover:text-amber-900 text-3xl font-light">&times;</button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-body font-semibold text-amber-800 mb-2">Senha</label>
+                    <input type="password" id="passwordInput" class="w-full px-4 py-3 border-2 border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white font-body" placeholder="Digite a senha">
+                    <p id="loginError" style="display: none;" class="text-red-600 text-sm mt-2 font-body">Senha incorreta!</p>
+                </div>
+                <button id="loginSubmit" class="w-full py-3 bg-gradient-to-r from-amber-600 to-yellow-700 text-white rounded-lg hover:from-amber-700 hover:to-yellow-800 transition-all font-body text-lg font-semibold shadow-lg">Entrar</button>
+            </div>
+        </div>
     </div>
 
-    <div id="painel" style="display:none">
-      <input id="nome" placeholder="Nome do produto">
-      <input id="preco" placeholder="Preço">
-      <input id="img" placeholder="URL da imagem (.jpg .png .webp)">
-      <button onclick="salvar()">Salvar produto</button>
-    </div>
-  </div>
-</div>
+    <main class="max-w-7xl mx-auto px-4 py-16">
+        <div id="adminControls" style="display: none;" class="mb-12 flex justify-center">
+            <button id="addProductBtn" class="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-600 to-yellow-700 text-white rounded-full hover:from-amber-700 hover:to-yellow-800 transition-all shadow-xl font-body text-lg font-semibold">
+                <span class="text-2xl">✨</span> Adicionar Produto
+            </button>
+        </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js";
+        <div id="productForm" style="display: none;" class="mb-12 max-w-lg mx-auto bg-gradient-to-br from-amber-50 to-yellow-50 p-8 rounded-2xl shadow-2xl border-2 border-amber-300">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="formTitle" class="text-2xl font-display font-bold text-amber-900">Novo Produto</h3>
+                <button id="closeForm" class="text-amber-600 hover:text-amber-900 text-3xl font-light">&times;</button>
+            </div>
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-body font-semibold text-amber-800 mb-2">Nome do Produto</label>
+                    <input type="text" id="productName" class="w-full px-4 py-3 border-2 border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white font-body" placeholder="Ex: Perfume Floral Elegance">
+                </div>
+                <div>
+                    <label class="block text-sm font-body font-semibold text-amber-800 mb-2">URL da Imagem</label>
+                    <input type="text" id="productImage" class="w-full px-4 py-3 border-2 border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-white font-body" placeholder="https://...">
+                    <p class="text-xs text-amber-700 mt-2 font-body italic">💡 Dica: Faça upload em imgur.com e cole o link aqui</p>
+                </div>
+                <button id="saveProduct" class="w-full py-4 bg-gradient-to-r from-amber-600 to-yellow-700 text-white rounded-lg hover:from-amber-700 hover:to-yellow-800 transition-all font-body text-lg font-semibold shadow-lg">Salvar Produto</button>
+            </div>
+        </div>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCNcjKdISg8-X8QPFPY3pAqTCfjAa3Ie1M",
-  authDomain: "cfreitas-perfumary.firebaseapp.com",
-  projectId: "cfreitas-perfumary",
-  storageBucket: "cfreitas-perfumary.firebasestorage.app",
-  messagingSenderId: "459216808781",
-  appId: "1:459216808781:web:9a367e81b9d14c5c95e504",
-  databaseURL:"https://cfreitas-perfumary-default-rtdb.firebaseio.com/"
-};
+        <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"></div>
+        <div id="emptyState" style="display: none;" class="text-center py-32">
+            <p class="text-amber-700 text-2xl font-body italic">Nenhum produto cadastrado ainda.</p>
+        </div>
+    </main>
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const produtosRef = ref(db,"produtos");
+    <footer class="bg-gradient-to-r from-amber-800 via-yellow-700 to-amber-800 text-amber-50 py-12 mt-24 border-t-4 border-amber-400">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-2xl font-display font-bold tracking-wide">C.Freitas Perfumary</p>
+            <p class="text-base mt-3 opacity-90 font-body italic tracking-wider">Fragrâncias que contam histórias ✨</p>
+        </div>
+    </footer>
 
-const produtosDiv = document.getElementById("produtos");
+    <script>
+        const ADMIN_PASSWORD = 'cfreitas2025';
+        let isAdmin = false;
+        let products = [];
+        let editingId = null;
 
-onValue(produtosRef,(snap)=>{
-  produtosDiv.innerHTML="";
-  snap.forEach(p=>{
-    const d = p.val();
-    produtosDiv.innerHTML += `
-      <div class="card">
-        <img src="${d.img}">
-        <h3>${d.nome}</h3>
-        <p>R$ ${d.preco}</p>
-      </div>`;
-  });
-});
+        const elements = {
+            loginBtn: document.getElementById('loginBtn'),
+            logoutBtn: document.getElementById('logoutBtn'),
+            loginModal: document.getElementById('loginModal'),
+            closeLoginModal: document.getElementById('closeLoginModal'),
+            passwordInput: document.getElementById('passwordInput'),
+            loginSubmit: document.getElementById('loginSubmit'),
+            loginError: document.getElementById('loginError'),
+            adminControls: document.getElementById('adminControls'),
+            addProductBtn: document.getElementById('addProductBtn'),
+            productForm: document.getElementById('productForm'),
+            closeForm: document.getElementById('closeForm'),
+            formTitle: document.getElementById('formTitle'),
+            productName: document.getElementById('productName'),
+            productImage: document.getElementById('productImage'),
+            saveProduct: document.getElementById('saveProduct'),
+            productsGrid: document.getElementById('productsGrid'),
+            emptyState: document.getElementById('emptyState')
+        };
 
-window.login = ()=>{
-  if(document.getElementById("senha").value === "cfreitas2025"){
-    document.getElementById("login").style.display="none";
-    document.getElementById("painel").style.display="block";
-  } else {
-    alert("Senha errada");
-  }
-}
+        async function loadProducts() {
+            try {
+                const result = await window.storage.get('cfreitas-products', true);
+                if (result && result.value) {
+                    products = JSON.parse(result.value);
+                } else {
+                    products = [
+                        { id: 1, name: 'Perfume Floral Elegance', image: 'https://images.unsplash.com/photo-1588405748880-12d1d2a59d75?w=400&h=400&fit=crop' },
+                        { id: 2, name: 'Eau de Toilette Citrus', image: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400&h=400&fit=crop' },
+                        { id: 3, name: 'Perfume Amadeirado Luxo', image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop' }
+                    ];
+                    await window.storage.set('cfreitas-products', JSON.stringify(products), true);
+                }
+            } catch (error) {
+                products = [
+                    { id: 1, name: 'Perfume Floral Elegance', image: 'https://images.unsplash.com/photo-1588405748880-12d1d2a59d75?w=400&h=400&fit=crop' },
+                    { id: 2, name: 'Eau de Toilette Citrus', image: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400&h=400&fit=crop' },
+                    { id: 3, name: 'Perfume Amadeirado Luxo', image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop' }
+                ];
+            }
+            renderProducts();
+        }
 
-window.salvar = ()=>{
-  const nome = document.getElementById("nome").value;
-  const preco = document.getElementById("preco").value;
-  const img = document.getElementById("img").value;
+        async function saveProducts() {
+            try {
+                await window.storage.set('cfreitas-products', JSON.stringify(products), true);
+                showNotification('✅ Salvo com sucesso! Visível em todos os dispositivos');
+                setTimeout(loadProducts, 1000);
+            } catch (error) {
+                console.error('Erro ao salvar:', error);
+                showNotification('❌ Erro ao salvar. Tente novamente.');
+            }
+        }
 
-  if(!img.startsWith("http")){
-    alert("URL de imagem inválida");
-    return;
-  }
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.className = 'fixed top-24 right-6 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-4 rounded-xl shadow-2xl z-50 font-body font-semibold border-2 border-green-400';
+            notification.style.animation = 'float 0.5s ease-out';
+            document.body.appendChild(notification);
+            setTimeout(function() {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.5s';
+                setTimeout(function() { notification.remove(); }, 500);
+            }, 3000);
+        }
 
-  push(produtosRef,{nome,preco,img});
+        function renderProducts() {
+            if (products.length === 0) {
+                elements.productsGrid.style.display = 'none';
+                elements.emptyState.style.display = 'block';
+                return;
+            }
+            elements.productsGrid.style.display = 'grid';
+            elements.emptyState.style.display = 'none';
+            
+            elements.productsGrid.innerHTML = products.map(function(product) {
+                const adminButtons = isAdmin ? 
+                    '<div class="absolute top-3 right-3 flex gap-2">' +
+                    '<button onclick="editProduct(' + product.id + ')" class="p-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-all shadow-xl text-lg">✏️</button>' +
+                    '<button onclick="deleteProduct(' + product.id + ')" class="p-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all shadow-xl text-lg">🗑️</button>' +
+                    '</div>' : '';
+                
+                return '<div class="group bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 border-2 border-amber-200 hover:border-amber-400">' +
+                    '<div class="relative h-72 overflow-hidden bg-gradient-to-br from-amber-100 to-yellow-100">' +
+                    '<img src="' + product.image + '" alt="' + product.name + '" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.src=\'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop\'">' +
+                    '<div class="absolute inset-0 bg-gradient-to-t from-amber-900/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>' +
+                    adminButtons +
+                    '</div>' +
+                    '<div class="p-6 bg-gradient-to-b from-transparent to-amber-50/50">' +
+                    '<h3 class="text-2xl font-display font-bold text-amber-900 text-center leading-tight">' + product.name + '</h3>' +
+                    '</div>' +
+                    '</div>';
+            }).join('');
+        }
 
-  document.getElementById("nome").value="";
-  document.getElementById("preco").value="";
-  document.getElementById("img").value="";
-}
+        setInterval(async function() {
+            try {
+                const result = await window.storage.get('cfreitas-products', true);
+                if (result && result.value) {
+                    const newProducts = JSON.parse(result.value);
+                    if (JSON.stringify(newProducts) !== JSON.stringify(products)) {
+                        products = newProducts;
+                        renderProducts();
+                    }
+                }
+            } catch (error) {
+                console.log('Verificando atualizações...');
+            }
+        }, 3000);
 
-document.getElementById("adminBtn").onclick = ()=>{
-  document.getElementById("admin").style.display="block";
-}
-document.getElementById("admin").onclick = e=>{
-  if(e.target.id==="admin") e.target.style.display="none";
-}
-</script>
+        elements.loginBtn.addEventListener('click', function() {
+            elements.loginModal.style.display = 'flex';
+            elements.passwordInput.focus();
+        });
 
+        elements.closeLoginModal.addEventListener('click', function() {
+            elements.loginModal.style.display = 'none';
+            elements.passwordInput.value = '';
+            elements.loginError.style.display = 'none';
+        });
+
+        elements.loginSubmit.addEventListener('click', handleLogin);
+        elements.passwordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') handleLogin();
+        });
+
+        function handleLogin() {
+            if (elements.passwordInput.value === ADMIN_PASSWORD) {
+                isAdmin = true;
+                elements.loginModal.style.display = 'none';
+                elements.loginBtn.style.display = 'none';
+                elements.logoutBtn.style.display = 'flex';
+                elements.adminControls.style.display = 'flex';
+                elements.passwordInput.value = '';
+                elements.loginError.style.display = 'none';
+                renderProducts();
+                showNotification('🎉 Bem-vindo ao painel admin!');
+            } else {
+                elements.loginError.style.display = 'block';
+                elements.passwordInput.value = '';
+            }
+        }
+
+        elements.logoutBtn.addEventListener('click', function() {
+            isAdmin = false;
+            elements.loginBtn.style.display = 'flex';
+            elements.logoutBtn.style.display = 'none';
+            elements.adminControls.style.display = 'none';
+            elements.productForm.style.display = 'none';
+            renderProducts();
+        });
+
+        elements.addProductBtn.addEventListener('click', function() {
+            editingId = null;
+            elements.formTitle.textContent = 'Novo Produto';
+            elements.saveProduct.textContent = 'Salvar Produto';
+            elements.productName.value = '';
+            elements.productImage.value = '';
+            elements.productForm.style.display = 'block';
+            window.scrollTo({ top: elements.productForm.offsetTop - 100, behavior: 'smooth' });
+        });
+
+        elements.closeForm.addEventListener('click', function() {
+            elements.productForm.style.display = 'none';
+            editingId = null;
+        });
+
+        elements.saveProduct.addEventListener('click', async function() {
+            if (!elements.productName.value || !elements.productImage.value) {
+                showNotification('⚠️ Preencha todos os campos!');
+                return;
+            }
+            
+            if (editingId) {
+                products = products.map(function(p) {
+                    return p.id === editingId ? { id: p.id, name: elements.productName.value, image: elements.productImage.value } : p;
+                });
+            } else {
+                products.push({ 
+                    id: Date.now(), 
+                    name: elements.productName.value, 
+                    image: elements.productImage.value 
+                });
+            }
+            
+            await saveProducts();
+            elements.productForm.style.display = 'none';
+            editingId = null;
+        });
+
+        window.editProduct = function(id) {
+            const product = products.find(function(p) { return p.id === id; });
+            if (!product) return;
+            
+            editingId = id;
+            elements.formTitle.textContent = 'Editar Produto';
+            elements.saveProduct.textContent = 'Salvar Alterações';
+            elements.productName.value = product.name;
+            elements.productImage.value = product.image;
+            elements.productForm.style.display = 'block';
+            window.scrollTo({ top: elements.productForm.offsetTop - 100, behavior: 'smooth' });
+        };
+
+        window.deleteProduct = async function(id) {
+            if (!confirm('Deseja realmente excluir este produto?')) return;
+            products = products.filter(function(p) { return p.id !== id; });
+            await saveProducts();
+        };
+
+        loadProducts();
+    </script>
 </body>
 </html>
