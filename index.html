@@ -6,6 +6,11 @@
     <title>C.Freitas Perfumary</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
     <style>
         @keyframes float {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -123,12 +128,38 @@
     </footer>
 
     <script>
-        const ADMIN_PASSWORD = 'cfreitas2025';
-        let isAdmin = false;
-        let products = [];
-        let editingId = null;
+        var firebaseConfig = {
+            apiKey: "AIzaSyCNcjKdISg8-X8QPFPY3pAqTCfjAa3Ie1M",
+            authDomain: "cfreitas-perfumary.firebaseapp.com",
+            databaseURL: "https://cfreitas-perfumary-default-rtdb.firebaseio.com",
+            projectId: "cfreitas-perfumary",
+            storageBucket: "cfreitas-perfumary.firebasestorage.app",
+            messagingSenderId: "459216808781",
+            appId: "1:459216808781:web:9a367e81b9d14c5c95e504"
+        };
 
-        const elements = {
+        // Inicializar Firebase
+        let database;
+        let productsRef;
+        let useFirebase = false;
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+            productsRef = database.ref('products');
+            useFirebase = true;
+            console.log('Firebase conectado com sucesso!');
+        } catch (error) {
+            console.log('Firebase não configurado, usando storage local');
+            useFirebase = false;
+        }
+
+        var ADMIN_PASSWORD = 'cfreitas2025';
+        var isAdmin = false;
+        var products = [];
+        var editingId = null;
+
+        var elements = {
             loginBtn: document.getElementById('loginBtn'),
             logoutBtn: document.getElementById('logoutBtn'),
             loginModal: document.getElementById('loginModal'),
@@ -149,36 +180,78 @@
         };
 
         async function loadProducts() {
-            try {
-                const result = await window.storage.get('cfreitas-products', true);
-                if (result && result.value) {
-                    products = JSON.parse(result.value);
-                } else {
-                    products = [
-                        { id: 1, name: 'Perfume Floral Elegance', image: 'https://images.unsplash.com/photo-1588405748880-12d1d2a59d75?w=400&h=400&fit=crop' },
-                        { id: 2, name: 'Eau de Toilette Citrus', image: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400&h=400&fit=crop' },
-                        { id: 3, name: 'Perfume Amadeirado Luxo', image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop' }
-                    ];
-                    await window.storage.set('cfreitas-products', JSON.stringify(products), true);
+            if (useFirebase) {
+                productsRef.on('value', function(snapshot) {
+                    const data = snapshot.val();
+                    if (data) {
+                        products = Object.keys(data).map(function(key) {
+                            return { id: key, ...data[key] };
+                        });
+                    } else {
+                        products = getDefaultProducts();
+                        saveProducts();
+                    }
+                    renderProducts();
+                });
+            } else {
+                try {
+                    const result = await window.storage.get('cfreitas-products', true);
+                    if (result && result.value) {
+                        products = JSON.parse(result.value);
+                    } else {
+                        products = getDefaultProducts();
+                        await window.storage.set('cfreitas-products', JSON.stringify(products), true);
+                    }
+                } catch (error) {
+                    products = getDefaultProducts();
                 }
-            } catch (error) {
-                products = [
-                    { id: 1, name: 'Perfume Floral Elegance', image: 'https://images.unsplash.com/photo-1588405748880-12d1d2a59d75?w=400&h=400&fit=crop' },
-                    { id: 2, name: 'Eau de Toilette Citrus', image: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400&h=400&fit=crop' },
-                    { id: 3, name: 'Perfume Amadeirado Luxo', image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop' }
-                ];
+                renderProducts();
+                startPolling();
             }
-            renderProducts();
+        }
+
+        function getDefaultProducts() {
+            return [
+                { id: '1', name: 'Perfume Floral Elegance', image: 'https://images.unsplash.com/photo-1588405748880-12d1d2a59d75?w=400&h=400&fit=crop' },
+                { id: '2', name: 'Eau de Toilette Citrus', image: 'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400&h=400&fit=crop' },
+                { id: '3', name: 'Perfume Amadeirado Luxo', image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop' }
+            ];
         }
 
         async function saveProducts() {
-            try {
-                await window.storage.set('cfreitas-products', JSON.stringify(products), true);
-                showNotification('✅ Salvo com sucesso! Visível em todos os dispositivos');
-                setTimeout(loadProducts, 1000);
-            } catch (error) {
-                console.error('Erro ao salvar:', error);
-                showNotification('❌ Erro ao salvar. Tente novamente.');
+            if (useFirebase) {
+                const updates = {};
+                products.forEach(function(product) {
+                    updates[product.id] = { name: product.name, image: product.image };
+                });
+                await productsRef.set(updates);
+                showNotification('✅ Salvo! Atualizado em TODOS os dispositivos em tempo real');
+            } else {
+                try {
+                    await window.storage.set('cfreitas-products', JSON.stringify(products), true);
+                    showNotification('✅ Salvo! Visível em todos os dispositivos');
+                } catch (error) {
+                    showNotification('❌ Erro ao salvar. Tente novamente.');
+                }
+            }
+        }
+
+        function startPolling() {
+            if (!useFirebase) {
+                setInterval(async function() {
+                    try {
+                        const result = await window.storage.get('cfreitas-products', true);
+                        if (result && result.value) {
+                            const newProducts = JSON.parse(result.value);
+                            if (JSON.stringify(newProducts) !== JSON.stringify(products)) {
+                                products = newProducts;
+                                renderProducts();
+                            }
+                        }
+                    } catch (error) {
+                        console.log('Verificando atualizações...');
+                    }
+                }, 3000);
             }
         }
 
@@ -207,8 +280,8 @@
             elements.productsGrid.innerHTML = products.map(function(product) {
                 const adminButtons = isAdmin ? 
                     '<div class="absolute top-3 right-3 flex gap-2">' +
-                    '<button onclick="editProduct(' + product.id + ')" class="p-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-all shadow-xl text-lg">✏️</button>' +
-                    '<button onclick="deleteProduct(' + product.id + ')" class="p-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all shadow-xl text-lg">🗑️</button>' +
+                    '<button onclick="editProduct(\'' + product.id + '\')" class="p-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-all shadow-xl text-lg">✏️</button>' +
+                    '<button onclick="deleteProduct(\'' + product.id + '\')" class="p-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all shadow-xl text-lg">🗑️</button>' +
                     '</div>' : '';
                 
                 return '<div class="group bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 border-2 border-amber-200 hover:border-amber-400">' +
@@ -223,21 +296,6 @@
                     '</div>';
             }).join('');
         }
-
-        setInterval(async function() {
-            try {
-                const result = await window.storage.get('cfreitas-products', true);
-                if (result && result.value) {
-                    const newProducts = JSON.parse(result.value);
-                    if (JSON.stringify(newProducts) !== JSON.stringify(products)) {
-                        products = newProducts;
-                        renderProducts();
-                    }
-                }
-            } catch (error) {
-                console.log('Verificando atualizações...');
-            }
-        }, 3000);
 
         elements.loginBtn.addEventListener('click', function() {
             elements.loginModal.style.display = 'flex';
@@ -308,7 +366,7 @@
                 });
             } else {
                 products.push({ 
-                    id: Date.now(), 
+                    id: Date.now().toString(), 
                     name: elements.productName.value, 
                     image: elements.productImage.value 
                 });
